@@ -1,0 +1,9 @@
+<!-- Placeholder SVG for default product image -->
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+  <text x="100" y="100" text-anchor="middle" dy=".3em" font-family="Arial, sans-serif" font-size="14" fill="#6c757d">
+    Sin Imagen
+  </text>
+  <circle cx="100" cy="80" r="15" fill="none" stroke="#6c757d" stroke-width="2"/>
+  <path d="M85 125 L100 110 L115 125 L130 110 L145 125" stroke="#6c757d" stroke-width="2" fill="none"/>
+</svg>

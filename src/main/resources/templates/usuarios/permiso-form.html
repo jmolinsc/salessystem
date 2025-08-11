@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Permiso - Sales System</title>
+</head>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1" th:text="${permiso.id != null} ? 'Editar Permiso' : 'Nuevo Permiso'"></h2>
+            <p class="text-muted mb-0">Gestión de permisos del sistema</p>
+        </div>
+        <a th:href="@{/usuarios/web/permisos}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Permisos
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="card-title mb-0" th:text="${permiso.id != null} ? 'Editar Permiso' : 'Nuevo Permiso'"></h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/usuarios/web/permisos/guardar}" th:object="${permiso}" method="post">
+                <!-- Campo oculto para ID en caso de edición -->
+                <input type="hidden" th:field="*{id}" th:if="${permiso.id != null}"/>
+
+                <!-- Mensajes de error/éxito -->
+                <div th:if="${error}" class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                
+                <div th:if="${success}" class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre del Permiso <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                        <div class="form-text">Ej: USER_READ, PRODUCT_WRITE, ADMIN_DELETE</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="recurso" class="form-label">Recurso</label>
+                        <input type="text" class="form-control" id="recurso" th:field="*{recurso}">
+                        <div class="form-text">Ej: users, products, sales</div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="accion" class="form-label">Acción</label>
+                        <select class="form-select" id="accion" th:field="*{accion}">
+                            <option value="">Seleccionar acción...</option>
+                            <option value="CREATE">Crear</option>
+                            <option value="READ">Leer</option>
+                            <option value="UPDATE">Actualizar</option>
+                            <option value="DELETE">Eliminar</option>
+                            <option value="MANAGE">Gestionar</option>
+                            <option value="VIEW">Ver</option>
+                            <option value="ADMIN">Administrar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="3"
+                              placeholder="Describe qué permite hacer este permiso..."></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-2"></i>Guardar Permiso
+                    </button>
+                    <a th:href="@{/usuarios/web/permisos}" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</html>

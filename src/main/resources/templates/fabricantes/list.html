@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Manufacturer Management - NickelFox Sales System</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1">Manufacturer Management</h2>
+            <p class="text-muted mb-0">Manage product manufacturers</p>
+        </div>
+        <a th:href="@{/fabricantes/nuevo}" class="btn btn-primary-custom">
+            <i class="fas fa-industry me-2"></i>New Manufacturer
+        </a>
+    </div>
+
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h5 class="card-title">Manufacturer Catalog</h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-filter me-1"></i>Filter
+                </button>
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-download me-1"></i>Export
+                </button>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="fabricantesTable" class="table table-sm table-custom" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="compact-cell">Fabricante</th>
+                            <th class="compact-cell">País</th>
+                            <th class="compact-cell">Contacto</th>
+                            <th class="compact-cell">Productos</th>
+                            <th class="compact-cell">Estatus</th>
+                            <th class="compact-cell">Fecha Alta</th>
+                            <th class="compact-cell">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="fabricante : ${fabricantes}">
+                            <td class="compact-cell">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-info rounded-2 d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                        <i class="fas fa-industry text-white small"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold small" th:text="${fabricante.nombre}"></div>
+                                        <small class="text-muted d-block" th:text="${fabricante.descripcion}" style="font-size: 0.7rem; line-height: 1;"></small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="compact-cell">
+                                <span class="small" th:text="${fabricante.pais != null ? fabricante.pais : 'N/A'}"></span>
+                            </td>
+                            <td class="compact-cell">
+                                <div class="small">
+                                    <div th:if="${fabricante.email}" class="mb-1">
+                                        <i class="fas fa-envelope me-1"></i>
+                                        <span th:text="${fabricante.email}"></span>
+                                    </div>
+                                    <div th:if="${fabricante.telefono}">
+                                        <i class="fas fa-phone me-1"></i>
+                                        <span th:text="${fabricante.telefono}"></span>
+                                    </div>
+                                    <div th:if="${fabricante.sitioWeb}" class="mt-1">
+                                        <i class="fas fa-globe me-1"></i>
+                                        <a th:href="${fabricante.sitioWeb}" target="_blank" class="text-decoration-none small">Sitio Web</a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="compact-cell">
+                                <span class="badge badge-primary small" th:text="${fabricante.productos != null ? fabricante.productos.size() : 0}"></span>
+                            </td>
+                            <td class="compact-cell">
+                                <span th:if="${fabricante.estatus == 'ACTIVO'}" class="badge badge-success small">Activo</span>
+                                <span th:if="${fabricante.estatus == 'INACTIVO'}" class="badge badge-secondary small">Inactivo</span>
+                                <span th:if="${fabricante.estatus == 'SUSPENDIDO'}" class="badge badge-warning small">Suspendido</span>
+                                <span th:if="${fabricante.estatus == null}" class="badge badge-success small">Activo</span>
+                            </td>
+                            <td class="compact-cell">
+                                <span class="small" th:text="${#temporals.format(fabricante.fechaAlta, 'dd/MM/yyyy')}"></span>
+                            </td>
+                            <td class="compact-cell">
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/fabricantes/editar/{id}(id=${fabricante.id})}"
+                                       class="btn btn-outline-warning btn-sm py-1 px-2" title="Edit" style="font-size: 0.7rem;">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a th:href="@{/fabricantes/eliminar/{id}(id=${fabricante.id})}"
+                                       class="btn btn-outline-danger btn-sm py-1 px-2" title="Delete" style="font-size: 0.7rem;"
+                                       onclick="return confirm('¿Está seguro de que desea eliminar este fabricante?');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-info btn-sm py-1 px-2" 
+                                            title="Change Status" style="font-size: 0.7rem;"
+                                            th:onclick="'cambiarEstatus(' + ${fabricante.id} + ', \'' + ${fabricante.estatus} + '\')'">
+                                        <i class="fas fa-exchange-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="none">
+        $(document).ready(function() {
+            // Inicializar DataTable con preset para fabricantes
+            initializeDataTableWithPreset('#fabricantesTable', 'fabricantes', {
+                language: {
+                    search: 'Buscar fabricantes:',
+                    lengthMenu: 'Mostrar _MENU_ fabricantes por página',
+                    info: 'Mostrando _START_ a _END_ de _TOTAL_ fabricantes',
+                    infoEmpty: 'No hay fabricantes para mostrar',
+                    infoFiltered: '(filtrado de _MAX_ fabricantes totales)',
+                    zeroRecords: 'No se encontraron fabricantes que coincidan con la búsqueda',
+                    emptyTable: 'No hay fabricantes registrados en el sistema'
+                }
+            });
+        });
+
+        // Función para cambiar estatus
+        function cambiarEstatus(fabricanteId, estatusActual) {
+            const opciones = [
+                {value: 'ACTIVO', text: 'Activo'},
+                {value: 'INACTIVO', text: 'Inactivo'},
+                {value: 'SUSPENDIDO', text: 'Suspendido'}
+            ];
+
+            let optionsHtml = opciones
+                .filter(opt => opt.value !== estatusActual)
+                .map(opt => `<option value="${opt.value}">${opt.text}</option>`)
+                .join('');
+
+            const html = `
+                <div class="mb-3">
+                    <label class="form-label">Seleccionar nuevo estatus:</label>
+                    <select class="form-select" id="nuevoEstatus">
+                        ${optionsHtml}
+                    </select>
+                </div>
+            `;
+
+            if (confirm('¿Desea cambiar el estatus de este fabricante?')) {
+                // Crear un modal simple o usar prompt
+                const nuevoEstatus = prompt('Nuevo estatus (ACTIVO/INACTIVO/SUSPENDIDO):');
+                if (nuevoEstatus && ['ACTIVO', 'INACTIVO', 'SUSPENDIDO'].includes(nuevoEstatus.toUpperCase())) {
+                    $.post(`/fabricantes/cambiar-estatus/${fabricanteId}`, {
+                        estatus: nuevoEstatus.toUpperCase()
+                    })
+                    .done(function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            location.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    })
+                    .fail(function() {
+                        alert('Error al cambiar el estatus');
+                    });
+                }
+            }
+        }
+    </script>
+</th:block>
+</div>
+</body>
+</html>

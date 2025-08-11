@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title th:text="${comportamiento.id != null ? 'Editar Comportamiento - Sistema de Ventas NickelFox' : 'Nuevo Comportamiento - Sistema de Ventas NickelFox'}">Comportamiento</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1" th:text="${comportamiento.id != null ? 'Editar Comportamiento' : 'Nuevo Comportamiento'}">Comportamiento</h2>
+            <p class="text-muted mb-0">Gestiona la información de comportamientos del sistema</p>
+        </div>
+        <a th:href="@{/comportamientos}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver a Comportamientos
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0" th:text="${comportamiento.id != null ? 'Editar Información del Comportamiento' : 'Información del Comportamiento'}">Información del Comportamiento</h5>
+        </div>
+        <div class="card-body">
+            <!-- Error Messages -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
+            <form th:action="@{/comportamientos/guardar}" th:object="${comportamiento}" method="post" 
+                  id="comportamientoForm" class="row g-3">
+                <input type="hidden" th:field="*{id}" />
+                
+                <div class="col-md-4">
+                    <label for="codigo" class="form-label">Código del Comportamiento *</label>
+                    <input type="text" class="form-control" th:field="*{codigo}" id="codigo" 
+                           placeholder="ej. ENTRADA" required maxlength="50">
+                    <div class="invalid-feedback" id="codigoError">
+                        El código del comportamiento es requerido.
+                    </div>
+                    <div class="valid-feedback" id="codigoSuccess" style="display: none;">
+                        Código disponible.
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <label for="nombre" class="form-label">Nombre del Comportamiento *</label>
+                    <input type="text" class="form-control" th:field="*{nombre}" id="nombre" 
+                           placeholder="Nombre del comportamiento" required maxlength="100">
+                    <div class="invalid-feedback">
+                        El nombre del comportamiento es requerido.
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" th:field="*{descripcion}" id="descripcion" 
+                              rows="3" placeholder="Descripción del comportamiento" maxlength="255"></textarea>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="tipo" class="form-label">Tipo *</label>
+                    <select class="form-select" th:field="*{tipo}" id="tipo" required>
+                        <option value="">Seleccionar tipo...</option>
+                        <option value="INVENTARIO">Inventario</option>
+                        <option value="VENTAS">Ventas</option>
+                        <option value="GENERAL">General</option>
+                    </select>
+                    <div class="invalid-feedback">
+                        El tipo es requerido.
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="afectaStock" class="form-label">Afecta Stock</label>
+                    <select class="form-select" th:field="*{afectaStock}" id="afectaStock">
+                        <option value="false">No</option>
+                        <option value="true">Sí</option>
+                    </select>
+                    <div class="form-text">¿Este comportamiento afecta el stock del inventario?</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="signoMovimiento" class="form-label">Signo de Movimiento</label>
+                    <select class="form-select" th:field="*{signoMovimiento}" id="signoMovimiento">
+                        <option value="0">Neutro (0)</option>
+                        <option value="1">Positivo (+1) - Aumenta stock</option>
+                        <option value="-1">Negativo (-1) - Disminuye stock</option>
+                    </select>
+                    <div class="form-text">Cómo este comportamiento afecta la cantidad de stock</div>
+                </div>
+
+                <!-- Information for editing mode -->
+                <div th:if="${comportamiento.id != null}" class="col-12">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Estatus Actual</label>
+                            <div>
+                                <span class="badge fs-6" 
+                                      th:classappend="*{estatus == 'ACTIVO'} ? 'bg-success' : 'bg-danger'"
+                                      th:text="*{estatus}">
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de Registro</label>
+                            <div class="form-control-plaintext" 
+                                 th:text="${comportamiento.fechaAlta != null ? #temporals.format(comportamiento.fechaAlta, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> 
+                        <span th:text="${comportamiento.id != null ? 'Actualizar Comportamiento' : 'Guardar Comportamiento'}">Guardar Comportamiento</span>
+                    </button>
+                    <a th:href="@{/comportamientos}" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Behavior form loaded successfully');
+            
+            // Referencias a elementos del DOM
+            const form = document.getElementById('comportamientoForm');
+            const codigoInput = document.getElementById('codigo');
+            const nombreInput = document.getElementById('nombre');
+            const comportamientoId = document.querySelector('input[name="id"]').value;
+            const isNewBehavior = !comportamientoId;
+            
+            // Validación en tiempo real del código
+            let codigoTimeout;
+            codigoInput.addEventListener('input', function() {
+                clearTimeout(codigoTimeout);
+                codigoTimeout = setTimeout(() => {
+                    validateCodigo();
+                }, 500);
+            });
+            
+            function validateCodigo() {
+                const codigo = codigoInput.value.trim();
+                if (!codigo) return;
+                
+                const url = `/comportamientos/validar-codigo?codigo=${encodeURIComponent(codigo)}` + 
+                           (comportamientoId ? `&id=${comportamientoId}` : '');
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        const codigoError = document.getElementById('codigoError');
+                        const codigoSuccess = document.getElementById('codigoSuccess');
+                        
+                        if (data.existe) {
+                            codigoInput.classList.add('is-invalid');
+                            codigoInput.classList.remove('is-valid');
+                            codigoError.textContent = 'Este código ya existe. Por favor ingrese un código diferente.';
+                            codigoError.style.display = 'block';
+                            codigoSuccess.style.display = 'none';
+                        } else {
+                            codigoInput.classList.remove('is-invalid');
+                            codigoInput.classList.add('is-valid');
+                            codigoError.style.display = 'none';
+                            codigoSuccess.style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error validating codigo:', error);
+                    });
+            }
+            
+            // Validación del formulario
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                if (validateForm()) {
+                    // Verificar que el código no existe antes de enviar
+                    if (codigoInput.classList.contains('is-invalid')) {
+                        alert('Por favor corrija los errores antes de guardar.');
+                        return;
+                    }
+                    form.submit();
+                }
+                
+                form.classList.add('was-validated');
+            });
+            
+            function validateForm() {
+                let isValid = true;
+                
+                // Validar código
+                const codigo = document.getElementById('codigo');
+                if (!codigo.value.trim()) {
+                    isValid = false;
+                }
+                
+                // Validar nombre
+                const nombre = document.getElementById('nombre');
+                if (!nombre.value.trim()) {
+                    isValid = false;
+                }
+                
+                // Validar tipo
+                const tipo = document.getElementById('tipo');
+                if (!tipo.value) {
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+            
+            // Auto-generar código si está vacío (solo para comportamientos nuevos)
+            if (isNewBehavior && !codigoInput.value) {
+                nombreInput.addEventListener('blur', function() {
+                    if (!codigoInput.value && nombreInput.value) {
+                        // Generar código basado en el nombre
+                        const codigo = generateBehaviorCode(nombreInput.value);
+                        codigoInput.value = codigo;
+                        validateCodigo(); // Validar el código generado
+                    }
+                });
+            }
+            
+            function generateBehaviorCode(nombre) {
+                // Convertir a mayúsculas, eliminar espacios y caracteres especiales
+                let codigo = nombre.toUpperCase()
+                    .replace(/[^A-Z0-9\s]/g, '')
+                    .replace(/\s+/g, '_')
+                    .substring(0, 20);
+                return codigo;
+            }
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

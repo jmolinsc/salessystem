@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Gestión de Menús - Sales System</title>
+</head>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1">Gestión de Menús</h2>
+            <p class="text-muted mb-0">Administrar estructura de navegación del sistema</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/usuarios/web}" class="btn btn-outline-secondary">
+                <i class="fas fa-users me-2"></i>Usuarios
+            </a>
+            <a th:href="@{/usuarios/web/menus/nuevo}" class="btn btn-primary-custom">
+                <i class="fas fa-plus me-2"></i>Nuevo Menú
+            </a>
+        </div>
+    </div>
+
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h5 class="card-title">Estructura de Menús</h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-filter me-1"></i>Filtrar
+                </button>
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-download me-1"></i>Exportar
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-custom" id="menusTable" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Menú</th>
+                        <th>Ruta</th>
+                        <th>Tipo</th>
+                        <th>Orden</th>
+                        <th>Menú Padre</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="menu : ${menus}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <i th:class="${menu.icono + ' text-white'}" th:if="${menu.icono != null}"></i>
+                                    <i class="fas fa-sitemap text-white" th:if="${menu.icono == null}"></i>
+                                </div>
+                                <div>
+                                    <strong th:text="${menu.nombre}"></strong>
+                                    <br>
+                                    <small class="text-muted">ID: <span th:text="${menu.id}"></span></small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <code th:text="${menu.ruta}"></code>
+                        </td>
+                        <td>
+                            <span class="badge-status badge-success" th:if="${menu.esPadre}">Menú Padre</span>
+                            <span class="badge-status badge-info" th:if="${!menu.esPadre}">Submenú</span>
+                        </td>
+                        <td>
+                            <span class="badge-status badge-secondary" th:text="${menu.orden}"></span>
+                        </td>
+                        <td>
+                            <span th:if="${menu.menuPadre != null}" th:text="${menu.menuPadre.nombre}"></span>
+                            <span th:if="${menu.menuPadre == null}" class="text-muted">Raíz</span>
+                        </td>
+                        <td>
+                            <span class="badge-status badge-success" th:if="${menu.activo == null or menu.activo}">Activo</span>
+                            <span class="badge-status badge-danger" th:if="${menu.activo != null and !menu.activo}">Inactivo</span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a th:href="@{/usuarios/web/menus/editar/{id}(id=${menu.id})}"
+                                   class="btn btn-outline-warning btn-sm" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a th:href="@{/usuarios/web/menus/eliminar/{id}(id=${menu.id})}"
+                                   class="btn btn-outline-danger btn-sm" title="Eliminar"
+                                   onclick="return confirm('¿Estás seguro de que deseas eliminar este menú?');">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="none">
+        $(document).ready(function() {
+            // Verificar si la tabla ya está inicializada y destruirla si es necesario
+            if ($.fn.dataTable.isDataTable('#menusTable')) {
+                $('#menusTable').DataTable().destroy();
+            }
+            
+            // Inicializar DataTable con preset para menús
+            initializeDataTableWithPreset('#menusTable', 'dashboard', {
+                language: {
+                    search: 'Buscar menús:',
+                    lengthMenu: 'Mostrar _MENU_ menús por página',
+                    info: 'Mostrando _START_ a _END_ de _TOTAL_ menús',
+                    infoEmpty: 'No hay menús para mostrar',
+                    infoFiltered: '(filtrado de _MAX_ menús totales)',
+                    zeroRecords: 'No se encontraron menús que coincidan con la búsqueda',
+                    emptyTable: 'No hay menús registrados en el sistema'
+                }
+            });
+        });
+    </script>
+</th:block>
+
+</html>

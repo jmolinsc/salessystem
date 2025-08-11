@@ -1,0 +1,523 @@
+/* DataTables Dark Mode - Global Styles for NickelFox Theme */
+/* Aplica el modo oscuro usando el selector [data-theme="dark"] del tema NickelFox */
+
+/* Estilos ultra compactos para DataTables */
+.dataTables_wrapper {
+    font-size: 0.75rem; /* Texto más pequeño - reducido de 0.813rem */
+}
+
+.dataTables_length,
+.dataTables_filter,
+.dataTables_info,
+.dataTables_paginate {
+    margin-bottom: 0.25rem; /* Reducido de 0.5rem */
+}
+
+.dataTables_length select,
+.dataTables_filter input {
+    padding: 0.2rem 0.4rem !important; /* Reducido */
+    font-size: 0.688rem !important; /* Más pequeño */
+    border-radius: 0.25rem;
+    line-height: 1.2;
+}
+
+.dataTables_paginate .paginate_button {
+    padding: 0.15rem 0.3rem !important; /* Aún más reducido */
+    font-size: 0.6rem !important; /* Más pequeño que antes */
+    margin: 0 1px;
+    min-width: auto;
+    height: auto;
+    line-height: 1;
+}
+
+.dataTables_paginate .paginate_button.current,
+.dataTables_paginate .paginate_button.current:hover {
+    padding: 0.15rem 0.3rem !important;
+    font-size: 0.6rem !important;
+    min-height: auto;
+}
+
+.dataTables_paginate .paginate_button:hover {
+    padding: 0.15rem 0.3rem !important;
+    font-size: 0.6rem !important;
+}
+
+/* Contenedor de paginación más compacto */
+.dataTables_paginate {
+    margin: 0.25rem 0 !important;
+}
+
+.dataTables_paginate .pagination {
+    margin-bottom: 0 !important;
+    justify-content: center;
+}
+
+.dataTables_paginate .page-link {
+    padding: 0.15rem 0.3rem !important;
+    font-size: 0.6rem !important;
+    line-height: 1;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dataTables_info {
+    font-size: 0.688rem !important; /* Más pequeño */
+    margin-bottom: 0.25rem;
+}
+
+/* Tablas más compactas */
+.dataTables_wrapper .table {
+    margin-bottom: 0;
+}
+
+.dataTables_wrapper .table th,
+.dataTables_wrapper .table td {
+    padding: 0.3rem 0.5rem !important; /* Ultra compacto */
+    vertical-align: middle;
+    font-size: 0.75rem; /* Más pequeño */
+    line-height: 1.2;
+}
+
+.dataTables_wrapper .table th {
+    font-size: 0.688rem !important; /* Headers más pequeños */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+/* Badges más pequeños en DataTables */
+.dataTables_wrapper .badge {
+    font-size: 0.625rem; /* Muy pequeño */
+    padding: 0.125rem 0.375rem;
+    line-height: 1;
+}
+
+/* Botones más pequeños en DataTables */
+.dataTables_wrapper .btn-sm {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.625rem;
+}
+
+/* Controles de DataTables más compactos */
+.dataTables_length label {
+    font-size: 0.688rem;
+    margin-right: 0.5rem;
+}
+
+.dataTables_filter label {
+    font-size: 0.688rem;
+    margin-left: 0.5rem;
+}
+
+/* Paginación más compacta */
+.dataTables_paginate {
+    margin-top: 0.5rem;
+}
+
+.dataTables_paginate .paginate_button.previous,
+.dataTables_paginate .paginate_button.next {
+    padding: 0.2rem 0.3rem !important;
+}
+
+/* Responsive más compacto */
+@media (max-width: 768px) {
+    .dataTables_wrapper {
+        font-size: 0.688rem;
+    }
+    
+    .dataTables_wrapper .table th,
+    .dataTables_wrapper .table td {
+        padding: 0.25rem 0.375rem !important;
+        font-size: 0.688rem;
+    }
+}
+
+/* Celdas ultra compactas */
+.compact-cell {
+    padding: 0.3rem 0.5rem !important;
+    line-height: 1.2 !important;
+}
+
+/* Tabla pequeña Bootstrap integrada */
+.table-sm th,
+.table-sm td {
+    padding: 0.3rem 0.5rem !important;
+}
+
+/* Ajustes específicos para elementos dentro de DataTables */
+.dataTables_wrapper .small {
+    font-size: 0.625rem;
+}
+
+.dataTables_wrapper .fw-bold {
+    font-weight: 600; /* Reducido de 700 para que no sea tan pesado */
+}
+
+/* Iconos más pequeños en DataTables */
+.dataTables_wrapper .fas,
+.dataTables_wrapper .far,
+.dataTables_wrapper .fab {
+    font-size: 0.688rem;
+}
+
+/* Dropdown de longitud más compacto */
+.dataTables_length select {
+    min-width: 50px;
+    height: auto;
+}
+
+/* Input de filtro más compacto */
+.dataTables_filter input {
+    width: 150px;
+    height: auto;
+}
+
+/* Números de página más compactos */
+.dataTables_paginate .paginate_button {
+    min-width: 25px;
+    text-align: center;
+}
+
+/* Wrapper principal */
+[data-theme="dark"] .dataTables_wrapper {
+    color: #B7C5D3 !important;
+    font-size: 0.813rem;
+}
+
+/* Filtros y controles de entrada */
+[data-theme="dark"] .dataTables_filter input {
+    background-color: #2d3748 !important;
+    border: 1px solid #4a5568 !important;
+    color: #B7C5D3 !important;
+}
+
+[data-theme="dark"] .dataTables_length select {
+    background-color: #2d3748 !important;
+    border: 1px solid #4a5568 !important;
+    color: #B7C5D3 !important;
+}
+
+/* Cabeceras de tabla */
+[data-theme="dark"] .table thead th {
+    background-color: #2d3748 !important;
+    border-color: #4a5568 !important;
+    color: #FFFFFF !important;
+}
+
+/* Celdas de tabla */
+[data-theme="dark"] .table td {
+    background-color: #2a3547 !important;
+    border-color: #4a5568 !important;
+    color: #B7C5D3 !important;
+}
+
+[data-theme="dark"] .table tbody tr {
+    background-color: #2a3547 !important;
+}
+
+[data-theme="dark"] .table tbody tr:nth-of-type(odd) td {
+    background-color: #1a202c !important;
+}
+
+/* Hover effect */
+[data-theme="dark"] .table-hover tbody tr:hover td {
+    background-color: #4a5568 !important;
+}
+
+/* Paginación */
+[data-theme="dark"] .dataTables_paginate .paginate_button {
+    background: #2d3748 !important;
+    border: 1px solid #4a5568 !important;
+    color: #B7C5D3 !important;
+}
+
+[data-theme="dark"] .dataTables_paginate .paginate_button:hover {
+    background: #4a5568 !important;
+    border-color: #B7C5D3 !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .dataTables_paginate .paginate_button.current {
+    background: #5D87FF !important;
+    border-color: #5D87FF !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .dataTables_paginate .paginate_button.disabled {
+    background: #1a202c !important;
+    border-color: #2d3748 !important;
+    color: #4a5568 !important;
+}
+
+/* Info y labels */
+[data-theme="dark"] .dataTables_info,
+[data-theme="dark"] .dataTables_filter label,
+[data-theme="dark"] .dataTables_length label {
+    color: #B7C5D3 !important;
+}
+
+/* Mensaje cuando no hay datos */
+[data-theme="dark"] .dataTables_empty {
+    color: #4a5568 !important;
+}
+
+/* Wrapper general */
+[data-theme="dark"] .dataTables_wrapper .row {
+    color: #B7C5D3;
+}
+
+/* Controles de búsqueda focus */
+[data-theme="dark"] .dataTables_filter input:focus,
+[data-theme="dark"] .dataTables_length select:focus {
+    background-color: #2d3748 !important;
+    border-color: #5D87FF !important;
+    box-shadow: 0 0 0 0.25rem rgba(93, 135, 255, 0.25) !important;
+    color: #FFFFFF !important;
+}
+
+/* Ajustes adicionales para compatibilidad con NickelFox */
+[data-theme="dark"] .card {
+    background-color: var(--white) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .table {
+    --bs-table-bg: var(--white);
+    --bs-table-border-color: var(--border-color);
+}
+
+/* Ajustes para badges en modo oscuro */
+[data-theme="dark"] .badge.bg-success {
+    background-color: #13DEB9 !important;
+    color: #000 !important;
+}
+
+[data-theme="dark"] .badge.bg-danger {
+    background-color: #FA896B !important;
+    color: #fff !important;
+}
+
+[data-theme="dark"] .badge.bg-warning {
+    background-color: #FFAE1F !important;
+    color: #000 !important;
+}
+
+[data-theme="dark"] .badge.bg-info {
+    background-color: #539BFF !important;
+    color: #fff !important;
+}
+
+[data-theme="dark"] .badge.bg-primary {
+    background-color: #5D87FF !important;
+    color: #fff !important;
+}
+
+[data-theme="dark"] .badge.bg-secondary {
+    background-color: #7C8FAC !important;
+    color: #fff !important;
+}
+
+/* Estilos adicionales para mejorar la compatibilidad */
+[data-theme="dark"] .dataTables_scroll {
+    background-color: var(--white) !important;
+}
+
+[data-theme="dark"] .dataTables_scrollHead,
+[data-theme="dark"] .dataTables_scrollBody,
+[data-theme="dark"] .dataTables_scrollFoot {
+    background-color: var(--white) !important;
+}
+
+/* Estilos para botones en DataTables */
+[data-theme="dark"] .dt-buttons .btn {
+    background-color: #2d3748 !important;
+    border-color: #4a5568 !important;
+    color: #B7C5D3 !important;
+}
+
+[data-theme="dark"] .dt-buttons .btn:hover {
+    background-color: #4a5568 !important;
+    border-color: #B7C5D3 !important;
+    color: #FFFFFF !important;
+}
+
+/* Estilos para el processing/loading */
+[data-theme="dark"] .dataTables_processing {
+    background-color: #2d3748 !important;
+    color: #B7C5D3 !important;
+    border: 1px solid #4a5568 !important;
+}
+
+/* Estilos para responsive extension */
+[data-theme="dark"] table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before {
+    background-color: #5D87FF !important;
+}
+
+[data-theme="dark"] table.dataTable.dtr-inline.collapsed > tbody > tr.parent > td.dtr-control:before {
+    background-color: #FA896B !important;
+}
+
+/* Estilos para la fila de detalles responsive */
+[data-theme="dark"] table.dataTable > tbody > tr.child {
+    background-color: #1a202c !important;
+}
+
+[data-theme="dark"] table.dataTable > tbody > tr.child td {
+    background-color: #1a202c !important;
+    border-color: #4a5568 !important;
+    color: #B7C5D3 !important;
+}
+
+/* Corrección para ordenamiento */
+[data-theme="dark"] table.dataTable thead .sorting:before,
+[data-theme="dark"] table.dataTable thead .sorting:after,
+[data-theme="dark"] table.dataTable thead .sorting_asc:before,
+[data-theme="dark"] table.dataTable thead .sorting_asc:after,
+[data-theme="dark"] table.dataTable thead .sorting_desc:before,
+[data-theme="dark"] table.dataTable thead .sorting_desc:after {
+    color: #B7C5D3 !important;
+}
+
+/* Estilos para Modales en Modo Oscuro */
+[data-theme="dark"] .modal-content {
+    background-color: #2D3748 !important;
+    border: 1px solid #4A5568 !important;
+    color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .modal-header {
+    background-color: #1A202C !important;
+    border-bottom: 1px solid #4A5568 !important;
+    color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .modal-title {
+    color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .modal-body {
+    background-color: #2D3748 !important;
+    color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .modal-footer {
+    background-color: #1A202C !important;
+    border-top: 1px solid #4A5568 !important;
+}
+
+/* Botón cerrar del modal en modo oscuro */
+[data-theme="dark"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Inputs dentro de modales en modo oscuro */
+[data-theme="dark"] .modal .form-control {
+    background-color: #4A5568 !important;
+    border: 1px solid #718096 !important;
+    color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .modal .form-control:focus {
+    background-color: #4A5568 !important;
+    border-color: #63B3ED !important;
+    box-shadow: 0 0 0 0.2rem rgba(99, 179, 237, 0.25) !important;
+    color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .modal .form-control::placeholder {
+    color: #A0AEC0 !important;
+}
+
+/* Tabla dentro del modal en modo oscuro */
+[data-theme="dark"] .modal .table {
+    color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .modal .table th {
+    background-color: #1A202C !important;
+    border-color: #4A5568 !important;
+    color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .modal .table td {
+    background-color: #2D3748 !important;
+    border-color: #4A5568 !important;
+    color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .modal .table-hover tbody tr:hover {
+    background-color: #4A5568 !important;
+    color: #E2E8F0 !important;
+}
+
+/* Botones dentro del modal */
+[data-theme="dark"] .modal .btn-secondary {
+    background-color: #4A5568 !important;
+    border-color: #4A5568 !important;
+    color: #E2E8F0 !important;
+}
+
+[data-theme="dark"] .modal .btn-secondary:hover {
+    background-color: #718096 !important;
+    border-color: #718096 !important;
+}
+
+/* Paginación compacta en modo oscuro */
+[data-theme="dark"] .dataTables_paginate .paginate_button {
+    background-color: #4A5568 !important;
+    border: 1px solid #718096 !important;
+    color: #E2E8F0 !important;
+    border-radius: 0.25rem;
+    padding: 0.15rem 0.3rem !important;
+    font-size: 0.6rem !important;
+    margin: 0 1px;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+[data-theme="dark"] .dataTables_paginate .paginate_button:hover {
+    background-color: #718096 !important;
+    border-color: #A0AEC0 !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .dataTables_paginate .paginate_button.current {
+    background-color: #3182CE !important;
+    border-color: #3182CE !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .dataTables_paginate .paginate_button.disabled {
+    background-color: #2D3748 !important;
+    border-color: #4A5568 !important;
+    color: #718096 !important;
+    cursor: not-allowed;
+}
+
+[data-theme="dark"] .dataTables_paginate .page-link {
+    background-color: #4A5568 !important;
+    border-color: #718096 !important;
+    color: #E2E8F0 !important;
+    padding: 0.15rem 0.3rem !important;
+    font-size: 0.6rem !important;
+    min-width: 1.5rem;
+    height: 1.5rem;
+}
+
+[data-theme="dark"] .dataTables_paginate .page-link:hover {
+    background-color: #718096 !important;
+    border-color: #A0AEC0 !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .dataTables_paginate .page-item.active .page-link {
+    background-color: #3182CE !important;
+    border-color: #3182CE !important;
+    color: #FFFFFF !important;
+}

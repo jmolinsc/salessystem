@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout-nickelfox}"
+      th:with="title='Formulario de Cliente'">
+<head>
+    <title>Cliente</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0" th:text="${cliente.id != null} ? 'Editar Cliente' : 'Nuevo Cliente'"></h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/clientes/guardar}"
+                  th:object="${cliente}" method="post">
+
+                <!-- Campo oculto para ID en caso de edición -->
+                <input type="hidden" th:field="*{id}" th:if="${cliente.id != null}"/>
+
+                <!-- Mensajes de error generales -->
+                <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
+                    <ul>
+                        <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                    </ul>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}"
+                               th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}"
+                             th:errors="*{nombre}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="apellido" class="form-label">Apellido</label>
+                        <input type="text" class="form-control" id="apellido" th:field="*{apellido}"
+                               th:classappend="${#fields.hasErrors('apellido')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('apellido')}"
+                             th:errors="*{apellido}"></div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" th:field="*{email}"
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}"
+                             th:errors="*{email}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="telefono" th:field="*{telefono}"
+                               placeholder="Ej: +1 555-123-4567 o 555 123 4567"
+                               th:classappend="${#fields.hasErrors('telefono')} ? 'is-invalid' : ''">
+                        <div class="form-text">Formato: 7-15 dígitos, se permiten espacios, guiones y paréntesis</div>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('telefono')}"
+                             th:errors="*{telefono}"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="direccion" class="form-label">Dirección</label>
+                    <textarea class="form-control" id="direccion" th:field="*{direccion}" rows="3"
+                              placeholder="Ingrese la dirección completa del cliente"
+                              th:classappend="${#fields.hasErrors('direccion')} ? 'is-invalid' : ''"></textarea>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('direccion')}"
+                         th:errors="*{direccion}"></div>
+                </div>
+
+                <div th:if="${cliente.id != null}" class="mb-3">
+                    <p class="text-muted">
+                        <small>Registrado el:
+                            <span th:text="${#temporals.format(cliente.fechaRegistro, 'dd/MM/yyyy HH:mm')}"></span>
+                        </small>
+                    </p>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                    <a th:href="@{/clientes}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

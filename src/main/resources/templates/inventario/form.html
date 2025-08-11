@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layout-nickelfox}"
+      th:with="title='Formulario de Inventario'">
+<head>
+    <title th:text="${tipoOperacion == 'entrada' ? 'Entrada de Inventario' : 
+                     (tipoOperacion == 'salida' ? 'Salida de Inventario' : 'Ajuste de Stock')}">Inventario</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="card">
+        <div class="card-header" 
+             th:classappend="${tipoOperacion == 'entrada'} ? 'bg-success text-white' : 
+                            (${tipoOperacion == 'salida'} ? 'bg-danger text-white' : 'bg-warning text-white')">
+            <h5 class="card-title mb-0">
+                <i th:class="${tipoOperacion == 'entrada'} ? 'fas fa-plus-circle me-2' : 
+                             (${tipoOperacion == 'salida'} ? 'fas fa-minus-circle me-2' : 'fas fa-balance-scale me-2')"></i>
+                <span th:if="${tipoOperacion == 'entrada'}">Entrada de Inventario</span>
+                <span th:if="${tipoOperacion == 'salida'}">Salida de Inventario</span>
+                <span th:if="${tipoOperacion == 'ajuste'}">Ajuste de Stock</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <!-- Error Messages -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Success Messages -->
+            <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${mensaje}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <form method="post" id="movimientoForm">
+                <input type="hidden" name="tipoOperacion" th:value="${tipoOperacion}" id="tipoOperacion" />
+
+                <!-- Selección de Producto -->
+                <div class="mb-3">
+                    <label for="productoId" class="form-label">Producto *</label>
+                    <select class="form-select" id="productoId" name="productoId" required>
+                        <option value="">Seleccionar producto...</option>
+                        <option th:each="producto : ${productos}" 
+                                th:value="${producto.id}" 
+                                th:text="${producto.nombre + ' (' + producto.codigo + ') - Stock: ' + producto.stock}">
+                        </option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Por favor seleccione un producto.
+                    </div>
+                </div>
+
+                <!-- Información del Stock -->
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="stockActual" class="form-label">Stock Actual</label>
+                        <input type="number" class="form-control" id="stockActual" readonly 
+                               placeholder="Seleccione un producto">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="cantidad" class="form-label">
+                            <span th:if="${tipoOperacion == 'entrada'}">Cantidad a Ingresar *</span>
+                            <span th:if="${tipoOperacion == 'salida'}">Cantidad a Retirar *</span>
+                            <span th:if="${tipoOperacion == 'ajuste'}">Cantidad *</span>
+                        </label>
+                        <input type="number" class="form-control" id="cantidad" name="cantidad" 
+                               min="1" required placeholder="0">
+                        <div class="invalid-feedback">
+                            Por favor ingrese una cantidad válida.
+                        </div>
+                    </div>
+                    <div class="col-md-4" th:if="${tipoOperacion == 'ajuste'}">
+                        <label for="stockNuevo" class="form-label">Stock Nuevo *</label>
+                        <input type="number" class="form-control" id="stockNuevo" name="stockNuevo" 
+                               min="0" required placeholder="Stock correcto">
+                        <div class="invalid-feedback">
+                            Por favor ingrese el stock correcto.
+                        </div>
+                    </div>
+                    <div class="col-md-4" th:if="${tipoOperacion != 'ajuste'}">
+                        <label for="stockResultante" class="form-label">Stock Resultante</label>
+                        <input type="number" class="form-control" id="stockResultante" readonly 
+                               placeholder="Calculado automáticamente">
+                    </div>
+                </div>
+
+                <!-- Costo (solo para entradas) -->
+                <div class="row mb-3" th:if="${tipoOperacion == 'entrada'}">
+                    <div class="col-md-6">
+                        <label for="costo" class="form-label">Costo por Unidad</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="costo" name="costo" 
+                                   step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <small class="form-text text-muted">Opcional - Costo unitario del producto</small>
+                    </div>
+                </div>
+
+                <!-- Motivo -->
+                <div class="mb-3">
+                    <label for="motivo" class="form-label">Motivo *</label>
+                    <input type="text" class="form-control" id="motivo" name="motivo" 
+                           required maxlength="255" placeholder="Describe el motivo del movimiento">
+                    <div class="invalid-feedback">
+                        Por favor ingrese el motivo del movimiento.
+                    </div>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="mb-3">
+                    <label for="observaciones" class="form-label">Observaciones</label>
+                    <textarea class="form-control" id="observaciones" name="observaciones" 
+                              rows="3" maxlength="255" placeholder="Observaciones adicionales (opcional)"></textarea>
+                    <small class="form-text text-muted">Información adicional sobre el movimiento</small>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn" 
+                            th:classappend="${tipoOperacion == 'entrada'} ? 'btn-success' : 
+                                           (${tipoOperacion == 'salida'} ? 'btn-danger' : 'btn-warning')">
+                        <i th:class="${tipoOperacion == 'entrada'} ? 'fas fa-plus me-1' : 
+                                     (${tipoOperacion == 'salida'} ? 'fas fa-minus me-1' : 'fas fa-save me-1')"></i>
+                        <span th:if="${tipoOperacion == 'entrada'}">Guardar Entrada</span>
+                        <span th:if="${tipoOperacion == 'salida'}">Guardar Salida</span>
+                        <span th:if="${tipoOperacion == 'ajuste'}">Guardar Ajuste</span>
+                    </button>
+                    <a th:href="@{/inventario}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Información Adicional -->
+    <div class="alert alert-info mt-4" role="alert">
+        <h6 class="alert-heading">
+            <i class="fas fa-info-circle me-2"></i>Información Importante
+        </h6>
+        <p class="mb-0" th:if="${tipoOperacion == 'entrada'}">
+            Al registrar una entrada, se incrementará automáticamente el stock del producto seleccionado.
+        </p>
+        <p class="mb-0" th:if="${tipoOperacion == 'salida'}">
+            Al registrar una salida, se decrementará automáticamente el stock del producto seleccionado.
+        </p>
+        <p class="mb-0" th:if="${tipoOperacion == 'ajuste'}">
+            El ajuste calculará automáticamente la diferencia entre el stock actual y el stock nuevo que ingrese.
+        </p>
+    </div>
+</div>
+
+<!-- JavaScript específico -->
+<div layout:fragment="scripts">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productoSelect = document.getElementById('productoId');
+            const stockActualInput = document.getElementById('stockActual');
+            const cantidadInput = document.getElementById('cantidad');
+            const stockResultanteInput = document.getElementById('stockResultante');
+            const stockNuevoInput = document.getElementById('stockNuevo');
+            const tipoOperacion = document.querySelector('input[name="tipoOperacion"]').value;
+            
+            // Productos data
+            const productosData = {};
+            const productOptions = productoSelect.querySelectorAll('option[value]');
+            productOptions.forEach(option => {
+                if (option.value) {
+                    const text = option.textContent;
+                    const stockMatch = text.match(/Stock: (\d+)/);
+                    if (stockMatch) {
+                        productosData[option.value] = parseInt(stockMatch[1]);
+                    }
+                }
+            });
+
+            // Actualizar stock actual cuando se selecciona un producto
+            productoSelect.addEventListener('change', function() {
+                const productoId = this.value;
+                if (productoId && productosData[productoId] !== undefined) {
+                    stockActualInput.value = productosData[productoId];
+                    calcularStockResultante();
+                } else {
+                    stockActualInput.value = '';
+                    if (stockResultanteInput) stockResultanteInput.value = '';
+                }
+            });
+
+            // Calcular stock resultante en tiempo real
+            function calcularStockResultante() {
+                const stockActual = parseInt(stockActualInput.value) || 0;
+                const cantidad = parseInt(cantidadInput.value) || 0;
+                
+                if (stockResultanteInput) {
+                    let stockResultante = stockActual;
+                    
+                    if (tipoOperacion === 'entrada') {
+                        stockResultante = stockActual + cantidad;
+                    } else if (tipoOperacion === 'salida') {
+                        stockResultante = stockActual - cantidad;
+                    }
+                    
+                    stockResultanteInput.value = stockResultante >= 0 ? stockResultante : 0;
+                    
+                    // Validar que no se retire más stock del disponible
+                    if (tipoOperacion === 'salida' && cantidad > stockActual) {
+                        cantidadInput.classList.add('is-invalid');
+                        cantidadInput.setCustomValidity('No puede retirar más stock del disponible');
+                    } else {
+                        cantidadInput.classList.remove('is-invalid');
+                        cantidadInput.setCustomValidity('');
+                    }
+                }
+            }
+
+            // Event listeners para cálculos automáticos
+            if (cantidadInput) {
+                cantidadInput.addEventListener('input', calcularStockResultante);
+            }
+
+            // Para ajustes, calcular cantidad automáticamente
+            if (stockNuevoInput && tipoOperacion === 'ajuste') {
+                stockNuevoInput.addEventListener('input', function() {
+                    const stockActual = parseInt(stockActualInput.value) || 0;
+                    const stockNuevo = parseInt(this.value) || 0;
+                    const diferencia = Math.abs(stockNuevo - stockActual);
+                    
+                    if (cantidadInput) {
+                        cantidadInput.value = diferencia;
+                    }
+                });
+            }
+
+            // Validación del formulario
+            const form = document.getElementById('movimientoForm');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevenir envío normal
+                
+                if (!form.checkValidity()) {
+                    e.stopPropagation();
+                    form.classList.add('was-validated');
+                    return;
+                }
+                
+                // Determinar la URL según el tipo de operación
+                const tipoOperacion = document.getElementById('tipoOperacion').value;
+                let actionUrl = '/inventario/';
+                
+                switch(tipoOperacion) {
+                    case 'entrada':
+                        actionUrl += 'entrada';
+                        break;
+                    case 'salida':
+                        actionUrl += 'salida';
+                        break;
+                    case 'ajuste':
+                        actionUrl += 'ajuste';
+                        break;
+                    default:
+                        actionUrl += 'entrada';
+                }
+                
+                console.log('Enviando formulario a:', actionUrl);
+                
+                // Establecer la acción y enviar
+                form.action = actionUrl;
+                form.submit();
+            });
+
+            // Bootstrap validation styling
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('invalid', function() {
+                    this.classList.add('is-invalid');
+                });
+                
+                input.addEventListener('input', function() {
+                    if (this.checkValidity()) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    }
+                });
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

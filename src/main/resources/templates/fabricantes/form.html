@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title th:text="${fabricante.id != null ? 'Edit Manufacturer - NickelFox Sales System' : 'New Manufacturer - NickelFox Sales System'}">Manufacturer</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1" th:text="${fabricante.id != null ? 'Edit Manufacturer' : 'New Manufacturer'}">Manufacturer</h2>
+            <p class="text-muted mb-0">Manage manufacturer information</p>
+        </div>
+        <a th:href="@{/fabricantes}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Manufacturers
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="card-title mb-0" th:text="${fabricante.id != null ? 'Edit Manufacturer Information' : 'Manufacturer Information'}">Manufacturer Information</h5>
+        </div>
+        <div class="card-body">
+            <!-- Error Messages -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
+            <form th:action="@{/fabricantes/guardar}" th:object="${fabricante}" method="post" id="fabricanteForm" class="row g-3">
+                <input type="hidden" th:field="*{id}" />
+                
+                <!-- Información Básica -->
+                <div class="col-12">
+                    <h6 class="text-primary border-bottom pb-2 mb-3">
+                        <i class="fas fa-info-circle me-2"></i>Basic Information
+                    </h6>
+                </div>
+                
+                <div class="col-md-6">
+                    <label for="nombre" class="form-label">Manufacturer Name *</label>
+                    <input type="text" class="form-control" th:field="*{nombre}" id="nombre" 
+                           placeholder="e.g. Apple Inc." required maxlength="100">
+                    <div class="invalid-feedback" id="nombreError">
+                        Manufacturer name is required.
+                    </div>
+                    <div class="valid-feedback" id="nombreSuccess" style="display: none;">
+                        Name available.
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="pais" class="form-label">Country</label>
+                    <input type="text" class="form-control" th:field="*{pais}" id="pais" 
+                           placeholder="e.g. United States" maxlength="100">
+                </div>
+
+                <div class="col-12">
+                    <label for="descripcion" class="form-label">Description</label>
+                    <textarea class="form-control" th:field="*{descripcion}" id="descripcion" 
+                              rows="3" placeholder="Manufacturer description" maxlength="500"></textarea>
+                </div>
+
+                <!-- Información de Contacto -->
+                <div class="col-12 mt-4">
+                    <h6 class="text-primary border-bottom pb-2 mb-3">
+                        <i class="fas fa-address-card me-2"></i>Contact Information
+                    </h6>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" th:field="*{email}" id="email" 
+                           placeholder="contact@manufacturer.com" maxlength="100">
+                    <div class="invalid-feedback">
+                        Please enter a valid email address.
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="telefono" class="form-label">Phone</label>
+                    <input type="text" class="form-control" th:field="*{telefono}" id="telefono" 
+                           placeholder="+1 (555) 123-4567" maxlength="20">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="sitioWeb" class="form-label">Website</label>
+                    <input type="url" class="form-control" th:field="*{sitioWeb}" id="sitioWeb" 
+                           placeholder="https://www.manufacturer.com" maxlength="100">
+                    <div class="invalid-feedback">
+                        Please enter a valid URL.
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="estatus" class="form-label">Status</label>
+                    <select class="form-select" th:field="*{estatus}" id="estatus">
+                        <option value="ACTIVO">Active</option>
+                        <option value="INACTIVO">Inactive</option>
+                        <option value="SUSPENDIDO">Suspended</option>
+                    </select>
+                </div>
+
+                <!-- Información del Sistema -->
+                <div class="col-12 mt-4" th:if="${fabricante.id != null}">
+                    <h6 class="text-primary border-bottom pb-2 mb-3">
+                        <i class="fas fa-cogs me-2"></i>System Information
+                    </h6>
+                </div>
+
+                <div class="col-md-6" th:if="${fabricante.fechaAlta != null}">
+                    <label for="fechaAlta" class="form-label">Registration Date</label>
+                    <input type="datetime-local" class="form-control" th:field="*{fechaAlta}" id="fechaAlta" readonly>
+                    <div class="form-text">Date when manufacturer was registered</div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-save me-1"></i> 
+                        <span th:text="${fabricante.id != null ? 'Update Manufacturer' : 'Save Manufacturer'}">Save Manufacturer</span>
+                    </button>
+                    <a th:href="@{/fabricantes}" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Manufacturer form loaded successfully');
+            
+            // Referencias a elementos del DOM
+            const form = document.getElementById('fabricanteForm');
+            const nombreInput = document.getElementById('nombre');
+            const emailInput = document.getElementById('email');
+            const sitioWebInput = document.getElementById('sitioWeb');
+            const fabricanteId = document.querySelector('input[name="id"]').value;
+            const isNewFabricante = !fabricanteId;
+            
+            // Validación en tiempo real del nombre
+            let nombreTimeout;
+            nombreInput.addEventListener('input', function() {
+                clearTimeout(nombreTimeout);
+                nombreTimeout = setTimeout(() => {
+                    validateNombre();
+                }, 500); // Esperar 500ms después de que el usuario deje de escribir
+            });
+            
+            function validateNombre() {
+                const nombre = nombreInput.value.trim();
+                if (!nombre) return;
+                
+                const url = `/fabricantes/validar-nombre?nombre=${encodeURIComponent(nombre)}` + 
+                           (fabricanteId ? `&id=${fabricanteId}` : '');
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        const nombreError = document.getElementById('nombreError');
+                        const nombreSuccess = document.getElementById('nombreSuccess');
+                        
+                        if (data.existe) {
+                            nombreInput.classList.add('is-invalid');
+                            nombreInput.classList.remove('is-valid');
+                            nombreError.textContent = 'This manufacturer name already exists. Please enter a different name.';
+                            nombreError.style.display = 'block';
+                            nombreSuccess.style.display = 'none';
+                        } else {
+                            nombreInput.classList.remove('is-invalid');
+                            nombreInput.classList.add('is-valid');
+                            nombreError.style.display = 'none';
+                            nombreSuccess.style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error validating nombre:', error);
+                    });
+            }
+            
+            // Validación del formulario
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                if (validateForm()) {
+                    // Verificar que el nombre no existe antes de enviar
+                    if (nombreInput.classList.contains('is-invalid')) {
+                        alert('Please correct the errors before saving.');
+                        return;
+                    }
+                    form.submit();
+                }
+                
+                form.classList.add('was-validated');
+            });
+            
+            function validateForm() {
+                let isValid = true;
+                
+                // Validar nombre
+                const nombre = document.getElementById('nombre');
+                if (!nombre.value.trim()) {
+                    isValid = false;
+                }
+                
+                // Validar email si está presente
+                const email = document.getElementById('email');
+                if (email.value && !isValidEmail(email.value)) {
+                    isValid = false;
+                }
+                
+                // Validar sitio web si está presente
+                const sitioWeb = document.getElementById('sitioWeb');
+                if (sitioWeb.value && !isValidURL(sitioWeb.value)) {
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+            
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+            
+            function isValidURL(url) {
+                try {
+                    new URL(url);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+            
+            // Establecer estatus por defecto para nuevos fabricantes
+            const estatusSelect = document.getElementById('estatus');
+            if (estatusSelect && !estatusSelect.value && isNewFabricante) {
+                estatusSelect.value = 'ACTIVO';
+            }
+            
+            // Formatear automáticamente el sitio web
+            sitioWebInput.addEventListener('blur', function() {
+                let url = this.value.trim();
+                if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+                    this.value = 'https://' + url;
+                }
+            });
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

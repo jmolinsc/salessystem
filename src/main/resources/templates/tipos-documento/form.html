@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title th:text="${tipoDocumento.id != null ? 'Edit Document Type - NickelFox Sales System' : 'New Document Type - NickelFox Sales System'}">Document Type</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1" th:text="${tipoDocumento.id != null ? 'Edit Document Type' : 'New Document Type'}">Document Type</h2>
+            <p class="text-muted mb-0">Manage document type information</p>
+        </div>
+        <a th:href="@{/tipos-documento}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Document Types
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0" th:text="${tipoDocumento.id != null ? 'Edit Document Type Information' : 'Document Type Information'}">Document Type Information</h5>
+        </div>
+        <div class="card-body">
+            <!-- Error Messages -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
+            <form th:action="@{/tipos-documento/guardar}" th:object="${tipoDocumento}" method="post" id="tipoDocumentoForm" class="row g-3">
+                <input type="hidden" th:field="*{id}" />
+                
+                <!-- Información Básica -->
+                <div class="col-12">
+                    <h6 class="text-primary border-bottom pb-2 mb-3">
+                        <i class="fas fa-info-circle me-2"></i>Basic Information
+                    </h6>
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="mov" class="form-label">Movement Code *</label>
+                    <input type="text" class="form-control" th:field="*{mov}" id="mov" 
+                           placeholder="e.g. FACTURA" required maxlength="50">
+                    <div class="invalid-feedback" id="movError">
+                        Movement code is required.
+                    </div>
+                    <div class="valid-feedback" id="movSuccess" style="display: none;">
+                        Code available.
+                    </div>
+                    <div class="form-text">Unique identifier for this document type</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="descripcion" class="form-label">Description *</label>
+                    <input type="text" class="form-control" th:field="*{descripcion}" id="descripcion" 
+                           placeholder="e.g. Factura" required maxlength="100">
+                    <div class="invalid-feedback">
+                        Description is required.
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="modulo" class="form-label">Module *</label>
+                    <select class="form-select" name="modulo" id="modulo" required th:attr="data-selected=${tipoDocumento.modulo}">
+                        <option value="">Select module...</option>
+                        <option value="VTA" th:selected="${tipoDocumento.modulo == 'VTA'}">VTA - Sales</option>
+                        <option value="INV" th:selected="${tipoDocumento.modulo == 'INV'}">INV - Inventory</option>
+                        <option value="CXC" th:selected="${tipoDocumento.modulo == 'CXC'}">CXC - Accounts Receivable</option>
+                        <option value="CXP" th:selected="${tipoDocumento.modulo == 'CXP'}">CXP - Accounts Payable</option>
+                        <option value="CONT" th:selected="${tipoDocumento.modulo == 'CONT'}">CONT - Accounting</option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Module is required.
+                    </div>
+                    <div class="form-text">System module where this document type will be used</div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label for="comportamiento" class="form-label">Behavior *</label>
+                    <select class="form-select" name="comportamiento" id="comportamiento" required th:attr="data-selected=${tipoDocumento.comportamiento}">
+                        <option value="">Select behavior...</option>
+                        <optgroup label="Sales Documents">
+                            <option value="FACTURA" th:selected="${tipoDocumento.comportamiento == 'FACTURA'}">FACTURA - Invoice/Billing documents</option>
+                            <option value="DEVOLUCION" th:selected="${tipoDocumento.comportamiento == 'DEVOLUCION'}">DEVOLUCION - Returns and credit notes</option>
+                            <option value="PEDIDO" th:selected="${tipoDocumento.comportamiento == 'PEDIDO'}">PEDIDO - Orders and quotes</option>
+                        </optgroup>
+                        <optgroup label="Inventory Documents">
+                            <option value="ENTRADA" th:selected="${tipoDocumento.comportamiento == 'ENTRADA'}">ENTRADA - Increases inventory/values</option>
+                            <option value="SALIDA" th:selected="${tipoDocumento.comportamiento == 'SALIDA'}">SALIDA - Decreases inventory/values</option>
+                            <option value="NEUTRO" th:selected="${tipoDocumento.comportamiento == 'NEUTRO'}">NEUTRO - No inventory impact</option>
+                        </optgroup>
+                    </select>
+                    <div class="invalid-feedback">
+                        Behavior is required.
+                    </div>
+                    <div class="form-text">Defines how this document type affects inventory and transactions</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="estatus" class="form-label">Status</label>
+                    <select class="form-select" name="estatus" id="estatus" th:attr="data-selected=${tipoDocumento.estatus}">
+                        <option value="ACTIVO" th:selected="${tipoDocumento.estatus == 'ACTIVO'}">Active</option>
+                        <option value="INACTIVO" th:selected="${tipoDocumento.estatus == 'INACTIVO'}">Inactive</option>
+                    </select>
+                </div>
+
+                <!-- Información del Sistema -->
+                <div class="col-12 mt-4" th:if="${tipoDocumento.id != null}">
+                    <h6 class="text-primary border-bottom pb-2 mb-3">
+                        <i class="fas fa-cogs me-2"></i>System Information
+                    </h6>
+                </div>
+
+                <div class="col-md-6" th:if="${tipoDocumento.fechaAlta != null}">
+                    <label for="fechaAlta" class="form-label">Registration Date</label>
+                    <input type="text" class="form-control" 
+                           th:value="${tipoDocumento.fechaAlta != null} ? ${#temporals.format(tipoDocumento.fechaAlta, 'yyyy-MM-dd HH:mm:ss')} : ''" 
+                           id="fechaAlta" readonly>
+                    <div class="form-text">Date when document type was registered</div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> 
+                        <span th:text="${tipoDocumento.id != null ? 'Update Document Type' : 'Save Document Type'}">Save Document Type</span>
+                    </button>
+                    <a th:href="@{/tipos-documento}" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Document type form loaded successfully');
+            
+            // Referencias a elementos del DOM
+            const form = document.getElementById('tipoDocumentoForm');
+            const movInput = document.getElementById('mov');
+            const tipoDocumentoId = document.querySelector('input[name="id"]').value;
+            const isNewTipoDocumento = !tipoDocumentoId;
+            
+            // Función para establecer valores seleccionados en campos select
+            function setSelectedValue(selectId, selectedValue) {
+                const select = document.getElementById(selectId);
+                if (select && selectedValue) {
+                    const options = select.options;
+                    for (let i = 0; i < options.length; i++) {
+                        if (options[i].value === selectedValue) {
+                            options[i].selected = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Establecer valores seleccionados para campos cuando se edita
+            if (!isNewTipoDocumento) {
+                const comportamientoValue = document.getElementById('comportamiento').getAttribute('data-selected');
+                const estatusValue = '[[${tipoDocumento.estatus}]]';
+                const moduloValue = '[[${tipoDocumento.modulo}]]';
+                
+                setSelectedValue('comportamiento', comportamientoValue);
+                setSelectedValue('estatus', estatusValue);
+                setSelectedValue('modulo', moduloValue);
+            }
+            
+            // Validación en tiempo real del mov
+            let movTimeout;
+            movInput.addEventListener('input', function() {
+                clearTimeout(movTimeout);
+                movTimeout = setTimeout(() => {
+                    validateMov();
+                }, 500);
+            });
+            
+            function validateMov() {
+                const mov = movInput.value.trim();
+                if (!mov) return;
+                
+                const url = `/tipos-documento/validar-mov?mov=${encodeURIComponent(mov)}` + 
+                           (tipoDocumentoId ? `&id=${tipoDocumentoId}` : '');
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        const movError = document.getElementById('movError');
+                        const movSuccess = document.getElementById('movSuccess');
+                        
+                        if (data.existe) {
+                            movInput.classList.add('is-invalid');
+                            movInput.classList.remove('is-valid');
+                            movError.textContent = 'This movement code already exists. Please enter a different code.';
+                            movError.style.display = 'block';
+                            movSuccess.style.display = 'none';
+                        } else {
+                            movInput.classList.remove('is-invalid');
+                            movInput.classList.add('is-valid');
+                            movError.style.display = 'none';
+                            movSuccess.style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error validating mov:', error);
+                    });
+            }
+            
+            // Validación del formulario
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                if (validateForm()) {
+                    // Verificar que el mov no existe antes de enviar
+                    if (movInput.classList.contains('is-invalid')) {
+                        alert('Please correct the errors before saving.');
+                        return;
+                    }
+                    form.submit();
+                }
+                
+                form.classList.add('was-validated');
+            });
+            
+            function validateForm() {
+                let isValid = true;
+                
+                // Validar mov
+                const mov = document.getElementById('mov');
+                if (!mov.value.trim()) {
+                    isValid = false;
+                }
+                
+                // Validar descripcion
+                const descripcion = document.getElementById('descripcion');
+                if (!descripcion.value.trim()) {
+                    isValid = false;
+                }
+                
+                // Validar modulo
+                const modulo = document.getElementById('modulo');
+                if (!modulo.value) {
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+            
+            // Establecer estatus por defecto para nuevos tipos de documento
+            const estatusSelect = document.getElementById('estatus');
+            if (estatusSelect && !estatusSelect.value && isNewTipoDocumento) {
+                estatusSelect.value = 'ACTIVO';
+            }
+            
+            // Convertir mov a mayúsculas y reemplazar espacios con guiones bajos
+            movInput.addEventListener('input', function() {
+                let value = this.value.toUpperCase();
+                value = value.replace(/\s+/g, '_');
+                this.value = value;
+            });
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Category Form - NickelFox Sales System</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1" th:text="${categoria.id != null} ? 'Edit Category' : 'New Category'"></h2>
+            <p class="text-muted mb-0">Create or modify product categories</p>
+        </div>
+        <a th:href="@{/categorias}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Categories
+        </a>
+    </div>
+
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h5 class="card-title" th:text="${categoria.id != null} ? 'Category Information' : 'New Category Details'"></h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{${categoria.id != null} ? '/categorias/editar/' + ${categoria.id} : '/categorias/guardar'}"
+                  th:object="${categoria}" method="post">
+
+                <!-- Mensajes de error generales -->
+                <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
+                    <ul class="mb-0">
+                        <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                    </ul>
+                </div>
+
+                <!-- Mensaje de éxito si existe -->
+                <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label">Category Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nombre" th:field="*{nombre}"
+                                   th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid' : ''"
+                                   placeholder="Enter category name" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}"
+                                 th:errors="*{nombre}"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" th:if="${categoria.id != null}">
+                        <div class="mb-3">
+                            <label class="form-label">Category ID</label>
+                            <input type="text" class="form-control" th:value="${categoria.id}" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Description</label>
+                    <textarea class="form-control" id="descripcion" th:field="*{descripcion}" rows="4"
+                              th:classappend="${#fields.hasErrors('descripcion')} ? 'is-invalid' : ''"
+                              placeholder="Enter category description (optional)"></textarea>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('descripcion')}"
+                         th:errors="*{descripcion}"></div>
+                </div>
+
+                <div th:if="${categoria.id != null}" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary rounded-3 d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                        <i class="fas fa-box text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Associated Products</h6>
+                                        <span class="text-muted" th:text="${#lists.size(categoria.productos)} + ' products'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-success rounded-3 d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                        <i class="fas fa-check-circle text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Status</h6>
+                                        <span th:if="${#lists.size(categoria.productos) > 0}" class="text-success">Active Category</span>
+                                        <span th:if="${#lists.size(categoria.productos) == 0}" class="text-warning">Empty Category</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <button type="submit" class="btn btn-primary-custom me-2">
+                            <i class="fas fa-save me-2"></i>Save Category
+                        </button>
+                        <a th:href="@{/categorias}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                    <div th:if="${categoria.id != null && #lists.isEmpty(categoria.productos)}">
+                        <a th:href="@{/categorias/eliminar/{id}(id=${categoria.id})}"
+                           class="btn btn-outline-danger"
+                           onclick="return confirm('Are you sure you want to delete this category? This action cannot be undone.');">
+                            <i class="fas fa-trash me-2"></i>Delete Category
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+</html>

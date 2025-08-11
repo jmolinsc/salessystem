@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Category Management - NickelFox Sales System</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1">Category Management</h2>
+            <p class="text-muted mb-0">Organize your product categories</p>
+        </div>
+        <a th:href="@{/categorias/nuevo}" class="btn btn-primary-custom">
+            <i class="fas fa-tags me-2"></i>New Category
+        </a>
+    </div>
+
+    <!-- Mensajes de éxito/error -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h5 class="card-title">Product Categories</h5>
+            <div class="d-flex gap-2">
+                <span class="badge badge-info">
+                    <i class="fas fa-tags me-1"></i>
+                    <span th:text="${#lists.size(categorias)}"></span> categories
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-custom" id="categoriasTable" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Products</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="categoria : ${categorias}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-info rounded-3 d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                        <i class="fas fa-tags text-white"></i>
+                                    </div>
+                                    <div>
+                                        <strong th:text="${categoria.nombre}"></strong>
+                                        <br>
+                                        <small class="text-muted">ID: #<span th:text="${categoria.id}"></span></small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:if="${categoria.descripcion != null and !#strings.isEmpty(categoria.descripcion)}" 
+                                      th:text="${categoria.descripcion}"></span>
+                                <span th:if="${categoria.descripcion == null or #strings.isEmpty(categoria.descripcion)}" 
+                                      class="text-muted fst-italic">No description available</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge-status badge-primary me-2" th:text="${#lists.size(categoria.productos)}"></span>
+                                    <small class="text-muted">products</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:if="${#lists.size(categoria.productos) > 0}" class="badge-status badge-success">
+                                    <i class="fas fa-check-circle me-1"></i>Active
+                                </span>
+                                <span th:if="${#lists.size(categoria.productos) == 0}" class="badge-status badge-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Empty
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/categorias/editar/{id}(id=${categoria.id})}"
+                                       class="btn btn-outline-warning btn-sm" title="Edit Category">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a th:if="${#lists.isEmpty(categoria.productos)}"
+                                       th:href="@{/categorias/eliminar/{id}(id=${categoria.id})}"
+                                       class="btn btn-outline-danger btn-sm" title="Delete Category"
+                                       onclick="return confirm('Are you sure you want to delete this category? This action cannot be undone.');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    <button th:if="${not #lists.isEmpty(categoria.productos)}"
+                                            class="btn btn-outline-secondary btn-sm" disabled
+                                            title="Cannot delete category with associated products">
+                                        <i class="fas fa-lock"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="none">
+        $(document).ready(function() {
+            // Inicializar DataTable con configuración estándar y modo oscuro
+            initializeDataTable('#categoriasTable', {
+                pageLength: 10,
+                order: [[1, 'asc']], // Ordenar por nombre
+                columnDefs: [
+                    { orderable: false, targets: [-1] },
+                    { className: 'text-center', targets: [-1] }
+                ],
+                language: {
+                    search: 'Buscar categorías:',
+                    lengthMenu: 'Mostrar _MENU_ categorías por página',
+                    info: 'Mostrando _START_ a _END_ de _TOTAL_ categorías',
+                    infoEmpty: 'No hay categorías para mostrar',
+                    infoFiltered: '(filtrado de _MAX_ categorías totales)',
+                    zeroRecords: 'No se encontraron categorías que coincidan con la búsqueda',
+                    emptyTable: 'No hay categorías registradas en el sistema'
+                }
+            });
+        });
+    </script>
+</th:block>
+</div>
+</body>
+</html>
+
+</html>

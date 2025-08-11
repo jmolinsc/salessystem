@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Dashboard</title>
+</head>
+
+<div layout:fragment="content">
+    <!-- Official NickelFox Dashboard -->
+    
+    <!-- Stats Cards Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="stats-icon" style="background: var(--primary-color);">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="stats-number">$54,623</div>
+                        <div class="stats-label">Total Revenue</div>
+                        <div class="stats-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>+12.5% from last month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="stats-icon" style="background: var(--success-color);">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="stats-number">1,423</div>
+                        <div class="stats-label">Total Orders</div>
+                        <div class="stats-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>+8.2% from last month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="stats-icon" style="background: var(--warning-color);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="stats-number">892</div>
+                        <div class="stats-label">Total Customers</div>
+                        <div class="stats-trend trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>+5.7% from last month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card">
+                <div class="d-flex align-items-center">
+                    <div class="stats-icon" style="background: var(--danger-color);">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="stats-number">156</div>
+                        <div class="stats-label">Products</div>
+                        <div class="stats-trend trend-down">
+                            <i class="fas fa-arrow-down me-1"></i>-2.1% from last month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-8">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="card-title">Revenue Analytics</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                            Last 7 Days
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Last 7 Days</a></li>
+                            <li><a class="dropdown-item" href="#">Last 30 Days</a></li>
+                            <li><a class="dropdown-item" href="#">Last 3 Months</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body-custom">
+                    <canvas id="revenueChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="card-title">Sales Distribution</h5>
+                </div>
+                <div class="card-body-custom">
+                    <canvas id="salesChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions and Quick Actions -->
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="card-title">Recent Transactions</h5>
+                    <a href="/ventas" class="btn btn-primary-custom">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Customer</th>
+                                <th>Product</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge-status badge-primary">#001</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-3" style="width: 35px; height: 35px; font-size: 12px;">
+                                            JP
+                                        </div>
+                                        <div>
+                                            <strong>John Peterson</strong><br>
+                                            <small class="text-muted">john@example.com</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>MacBook Pro 16"</td>
+                                <td><strong>$2,399.00</strong></td>
+                                <td><span class="badge-status badge-success">Completed</span></td>
+                                <td>Jan 15, 2025</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge-status badge-primary">#002</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-3" style="width: 35px; height: 35px; font-size: 12px; background: var(--success-color);">
+                                            MG
+                                        </div>
+                                        <div>
+                                            <strong>Maria Garcia</strong><br>
+                                            <small class="text-muted">maria@example.com</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>iPhone 15 Pro</td>
+                                <td><strong>$999.00</strong></td>
+                                <td><span class="badge-status badge-warning">Pending</span></td>
+                                <td>Jan 14, 2025</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge-status badge-primary">#003</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-3" style="width: 35px; height: 35px; font-size: 12px; background: var(--warning-color);">
+                                            CL
+                                        </div>
+                                        <div>
+                                            <strong>Carlos Lopez</strong><br>
+                                            <small class="text-muted">carlos@example.com</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>iPad Air</td>
+                                <td><strong>$599.00</strong></td>
+                                <td><span class="badge-status badge-success">Completed</span></td>
+                                <td>Jan 13, 2025</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4">
+            <div class="card-custom">
+                <div class="card-header-custom">
+                    <h5 class="card-title">Quick Actions</h5>
+                </div>
+                <div class="card-body-custom">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <a href="/ventas/nueva" class="btn btn-primary-custom w-100 text-center py-3">
+                                <i class="fas fa-plus mb-2 d-block fs-4"></i>
+                                <div class="fw-semibold">New Sale</div>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="/clientes/nuevo" class="btn btn-success-custom w-100 text-center py-3">
+                                <i class="fas fa-user-plus mb-2 d-block fs-4"></i>
+                                <div class="fw-semibold">Add Customer</div>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="/productos/nuevo" class="btn btn-warning-custom w-100 text-center py-3">
+                                <i class="fas fa-box mb-2 d-block fs-4"></i>
+                                <div class="fw-semibold">Add Product</div>
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="/categorias/nuevo" class="btn btn-danger-custom w-100 text-center py-3">
+                                <i class="fas fa-chart-line mb-2 d-block fs-4"></i>
+                                <div class="fw-semibold">Categories</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Implementation -->
+<th:block layout:fragment="scripts">
+    <script>
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [12000, 19000, 15000, 25000, 22000, 30000, 35000],
+                    borderColor: '#5D87FF',
+                    backgroundColor: 'rgba(93, 135, 255, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#5D87FF',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e5eaef',
+                            borderDash: [5, 5]
+                        },
+                        ticks: {
+                            color: '#5A6A85',
+                            font: {
+                                size: 12
+                            },
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#5A6A85',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Sales Distribution Chart
+        const salesCtx = document.getElementById('salesChart').getContext('2d');
+        new Chart(salesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Electronics', 'Clothing', 'Books', 'Home & Garden'],
+                datasets: [{
+                    data: [45, 25, 15, 15],
+                    backgroundColor: [
+                        '#5D87FF',
+                        '#49BEFF',
+                        '#13DEB9',
+                        '#FFAE1F'
+                    ],
+                    borderWidth: 0,
+                    cutout: '70%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            font: {
+                                size: 12
+                            },
+                            color: '#5A6A85'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</th:block>
+
+</html>

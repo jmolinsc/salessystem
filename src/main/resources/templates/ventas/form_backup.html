@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>New Sale - NickelFox Sales System</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="loading-text mt-3">
+                    <span id="loadingMessage">Procesando...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h3 mb-1" th:text="${esEdicion != null ? 'Edit Sale' : 'New Sale'}">New Sale</h2>
+                <p class="text-muted mb-0"
+                    th:text="${esEdicion != null ? 'Modify sales transaction' : 'Create a new sales transaction'}">
+                    Create a new sales transaction</p>
+            </div>
+            <a th:href="@{/ventas}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Sales
+            </a>
+        </div>
+
+        <!-- Botones de acción modernos -->
+        <!-- Status Display -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h4 mb-0" th:text="${esEdicion != null ? 'Editar Venta' : 'Nueva Venta'}">Nueva Venta</h2>
+            </div>
+            <div class="status-display" th:if="${venta.estatus != null}">
+                <span class="badge fs-6" th:classappend="${venta.estatus.name() == 'SIN_AFECTAR' ? 'bg-secondary' : 
+                                  venta.estatus.name() == 'PENDIENTE' ? 'bg-warning text-dark' : 
+                                  venta.estatus.name() == 'CONCLUIDO' ? 'bg-success' : 'bg-primary'}"
+                    th:text="${venta.estatus.descripcion}">
+                    Estado
+                </span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0"
+                    th:text="${esEdicion != null ? 'Edit Sale Information' : 'Sale Information'}">Sale Information</h5>
+            </div>
+            <div class="card-body">
+
+                <form id="ventaForm"
+                    th:action="${esEdicion != null ? '/ventas/actualizar/' + venta.id : '/ventas/guardar'}"
+                    th:object="${venta}" method="post">
+
+                    <!-- Campo oculto para el ID en caso de edición -->
+                    <input type="hidden" th:field="*{id}" th:if="${venta.id != null}">
+
+                    <div class="row mb-3">
+                        <!-- Primera fila de campos -->
+                        <div class="col-md-3">
+                            <label for="mov" class="form-label">Mov<span class="text-danger">*</span></label>
+                            <select class="form-select" name="mov.id" id="mov" required
+                                onchange="updateComportamiento()" th:disabled="${formularioDeshabilitado}">
+                                <option value="">Select document type...</option>
+                                <option th:each="tipo : ${tiposDocumento}" th:value="${tipo.id}"
+                                    th:text="${tipo.descripcion}" th:attr="data-comportamiento=${tipo.comportamiento}"
+                                    th:selected="${venta.mov != null and venta.mov.id == tipo.id}"></option>
+                            </select>
+                            <!-- Campo oculto para el comportamiento -->
+                            <input type="hidden" name="comportamiento" id="comportamiento"
+                                th:value="${venta.mov != null ? venta.mov.comportamiento : ''}">
+                                
+                        </div>
+                       <div class="col-md-3">
+                            <label for="movId" class="form-label">Movid</label>
+                            <input type="number" class="form-control" th:field="*{movId}" id="movId" readonly>
+                            <div class="form-text">Movid</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="fechaEmision" class="form-label">Fecha Emision <span class="text-danger">*</span></label>
+                             <input type="date" class="form-control" th:field="*{fechaEmision}" id="fechaEmision"
+                                required th:disabled="${formularioDeshabilitado}">
+                            <input type="hidden" class="form-control" th:field="*{fecha}" id="fecha"    th:disabled="${formularioDeshabilitado}">
+                        </div>
+
+
+                       
+                    </div>
+
+                    <div class="row mb-3">
+                        <!-- Segunda fila de campos -->
+                        <div class="col-md-5">
+                            <label for="cliente" class="form-label">Cliente <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="clienteDisplay" 
+                                       placeholder="Buscar cliente..." readonly
+                                       th:disabled="${formularioDeshabilitado}">
+                                <button class="btn btn-outline-secondary" type="button" 
+                                        id="buscarClienteBtn"
+                                        th:disabled="${formularioDeshabilitado}">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <button class="btn btn-info btn-sm" type="button" id="testModalBtn" style="margin-left: 5px;">
+                                    Test Modal
+                                </button>
+                            </div>
+                            <!-- Campos ocultos para almacenar la información del cliente -->
+                            <input type="hidden" th:field="*{cliente.id}" id="clienteId">
+                            <div class="mt-2" id="clienteInfo" style="display: none;">
+                                <small class="text-muted">
+                                    <strong>Código:</strong> <span id="clienteCodigo"></span> | 
+                                    <strong>Email:</strong> <span id="clienteEmail"></span> | 
+                                    <strong>Teléfono:</strong> <span id="clienteTelefono"></span>
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="condicion" class="form-label">Payment Condition</label>
+                            <select class="form-select" th:field="*{condicion}" id="condicion"
+                                th:disabled="${formularioDeshabilitado}">
+                                <option th:each="cond : ${T(com.salessystem.model.CondicionPago).values()}"
+                                    th:value="${cond}" th:text="${cond.descripcion}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="descuento" class="form-label">Discount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" th:field="*{descuento}" id="descuento"
+                                    step="0.01" min="0" placeholder="0.00" th:disabled="${formularioDeshabilitado}">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="total" class="form-label">Total</label>
+                            <input type="text" class="form-control" th:field="*{total}" id="total" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h5>Detalle de Venta</h5>
+                            <button type="button" id="agregarProductoBtn" class="btn btn-primary mb-3"
+                                data-bs-toggle="modal" data-bs-target="#productosModal"
+                                th:disabled="${formularioDeshabilitado}">
+                                <i class="fas fa-plus"></i> Agregar Producto
+                            </button>
+
+                            <div class="table-responsive">
+                                <table id="detalleTable" class="table table-bordered no-auto-datatable">
+                                    <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Cantidad</th>
+                                            <th>Precio Unitario</th>
+                                            <th>Subtotal</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Detalles se agregarán dinámicamente -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                            <td id="totalVenta">$0.00</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campos ocultos para los detalles -->
+                    <div id="detallesHidden"></div>
+
+                    <!-- Badge del estatus en la parte inferior -->
+                    <div class="row mt-4">
+                        <div class="col-md-12 d-flex justify-content-center">
+                            <div class="status-badge-final">
+                                <!-- Campo oculto para el estatus -->
+                                <input type="hidden" th:field="*{estatus}" id="estatus">
+
+                                <!-- Badge visual del estatus -->
+                                <div class="status-display" id="statusDisplay">
+                                    <span th:if="${venta.estatus == T(com.salessystem.model.EstatusVenta).PENDIENTE}"
+                                        class="badge bg-warning fs-5 px-4 py-2">
+                                        <i class="fas fa-bolt text-warning me-2"></i>
+                                        <span
+                                            th:text="${T(com.salessystem.model.EstatusVenta).PENDIENTE.descripcion}">Pendiente</span>
+                                    </span>
+                                    <span th:if="${venta.estatus == T(com.salessystem.model.EstatusVenta).CONCLUIDO}"
+                                        class="badge bg-success fs-5 px-4 py-2">
+                                        <i class="fas fa-check text-white me-2"></i>
+                                        <span
+                                            th:text="${T(com.salessystem.model.EstatusVenta).CONCLUIDO.descripcion}">Concluido</span>
+                                    </span>
+                                    <span th:if="${venta.estatus == T(com.salessystem.model.EstatusVenta).SIN_AFECTAR}"
+                                        class="badge bg-secondary fs-5 px-4 py-2">
+                                        <i class="fas fa-clock text-white me-2"></i>
+                                        <span
+                                            th:text="${T(com.salessystem.model.EstatusVenta).SIN_AFECTAR.descripcion}">Sin
+                                            Afectar</span>
+                                    </span>
+                                    <span th:if="${venta.estatus == T(com.salessystem.model.EstatusVenta).CANCELADO}"
+                                        class="badge bg-danger fs-5 px-4 py-2">
+                                        <i class="fas fa-times text-white me-2"></i>
+                                        <span
+                                            th:text="${T(com.salessystem.model.EstatusVenta).CANCELADO.descripcion}">Cancelado</span>
+                                    </span>
+                                    <!-- Badge por defecto para nuevas ventas -->
+                                    <span th:if="${venta.estatus == null}" class="badge bg-secondary fs-5 px-4 py-2">
+                                        <i class="fas fa-clock text-white me-2"></i> Sin Afectar
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción dentro del formulario -->
+                    <div class="d-flex justify-content-end gap-2 mt-4 mb-3">
+                        <!-- Botón Guardar -->
+                        <button type="button" class="btn btn-modern btn-primary-modern"
+                            th:disabled="${formularioDeshabilitado}" onclick="enviarFormularioAjax('guardar')"
+                            id="btnGuardar">
+                            <div class="btn-content">
+                                <i class="fas fa-save"></i>
+                                <span th:text="${esEdicion != null ? 'Actualizar' : 'Guardar'}">Guardar</span>
+                            </div>
+                        </button>
+
+                        <!-- Botón Afectar (solo si no está concluido o pendiente) -->
+                        <button type="button" class="btn btn-modern btn-success-modern"
+                            th:unless="${venta.estatus == T(com.salessystem.model.EstatusVenta).CONCLUIDO or venta.estatus == T(com.salessystem.model.EstatusVenta).PENDIENTE}"
+                            th:disabled="${formularioDeshabilitado}" onclick="enviarFormularioAjax('afectar')"
+                            id="btnAfectar">
+                            <div class="btn-content">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Afectar</span>
+                            </div>
+                        </button>
+
+                        <!-- Botón Cancelar -->
+                        <a th:href="@{/ventas}" class="btn btn-modern btn-secondary-modern">
+                            <div class="btn-content">
+                                <i class="fas fa-times"></i>
+                                <span>Cancelar</span>
+                            </div>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal para seleccionar productos -->
+        <div class="modal fade" id="productosModal" tabindex="-1" aria-labelledby="productosModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productosModalLabel">Seleccionar Productos</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <input type="text" id="searchProduct" class="form-control" placeholder="Buscar producto...">
+                        </div>
+                        <div class="table-responsive">
+                            <table id="productosTableModal" class="table table-hover table-sm no-auto-datatable">
+                                <thead>
+                                    <tr>
+                                        <th class="compact-cell">Código</th>
+                                        <th class="compact-cell">Nombre</th>
+                                        <th class="compact-cell">Precio</th>
+                                        <th class="compact-cell">Stock</th>
+                                        <th class="compact-cell">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="producto : ${productos}">
+                                        <td class="compact-cell" th:text="${producto.codigo}"></td>
+                                        <td class="compact-cell" th:text="${producto.nombre}"></td>
+                                        <td class="compact-cell"
+                                            th:text="${'$' + #numbers.formatDecimal(producto.precio, 1, 2)}"></td>
+                                        <td class="compact-cell" th:text="${producto.stock}"></td>
+                                        <td class="compact-cell">
+                                            <button type="button"
+                                                class="btn btn-sm btn-primary agregar-producto py-1 px-2"
+                                                th:data-id="${producto.id}" th:data-codigo="${producto.codigo}"
+                                                th:data-nombre="${producto.nombre}" th:data-precio="${producto.precio}"
+                                                style="font-size: 0.7rem;">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts específicos para ventas -->
+    <div layout:fragment="scripts">
+        <script th:inline="javascript">
+            // Variables globales del formulario (disponibles para todo el script)
+            /*<![CDATA[*/
+            var toastMessage = /*[[${toastMessage}]]*/ null;
+            var toastType = /*[[${toastType}]]*/ 'success';
+            var formularioDeshabilitado = /*[[${formularioDeshabilitado}]]*/ false;
+            var estatusVenta = /*[[${venta.estatus}]]*/ null;
+            /*]]>*/
+
+            console.log('=== DEBUG VARIABLES GLOBALES ===');
+            console.log('formularioDeshabilitado:', formularioDeshabilitado);
+            console.log('estatusVenta:', estatusVenta);
+            console.log('toastMessage:', toastMessage);
+            console.log('toastType:', toastType);
+
+            $(document).ready(function () {
+                debugger; // Para depuración, eliminar en producción
+                // Verificar que jQuery y Bootstrap estén disponibles
+                if (typeof $ === 'undefined') {
+                    console.error('jQuery no está disponible');
+                    return;
+                }
+
+                if (typeof bootstrap === 'undefined') {
+                    console.error('Bootstrap no está disponible');
+                    return;
+                }
+
+                // Inicializar DataTable para productos (solo si está disponible)
+                if ($.fn.DataTable) {
+                    try {
+                        // Asegurar que la tabla de detalle no sea manejada por DataTable
+                        $('#detalleTable').removeClass('table-custom').addClass('no-datatable');
+
+                        // Si la tabla de detalle fue inicializada como DataTable, destruirla
+                        if ($.fn.DataTable.isDataTable('#detalleTable')) {
+                            $('#detalleTable').DataTable().destroy();
+                            $('#detalleTable').removeClass('table-custom').addClass('no-datatable');
+                        }
+
+                        // Destruir tabla existente si ya está inicializada
+                        if ($.fn.DataTable.isDataTable('#productosTableModal')) {
+                            $('#productosTableModal').DataTable().destroy();
+                        }
+
+                        // Inicializar DataTable para productos en modal con modo oscuro y diseño compacto
+                        initializeDataTableWithPreset('#productosTableModal', 'productosModal', {
+                            searching: true,
+                            language: {
+                                search: 'Buscar productos:',
+                                lengthMenu: 'Mostrar _MENU_ productos',
+                                info: 'Mostrando _START_ a _END_ de _TOTAL_ productos',
+                                infoEmpty: 'No hay productos para mostrar',
+                                infoFiltered: '(filtrado de _MAX_ productos totales)',
+                                zeroRecords: 'No se encontraron productos que coincidan con la búsqueda',
+                                emptyTable: 'No hay productos disponibles'
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Error inicializando DataTable:', e);
+                    }
+                }
+
+                // Simplificar búsqueda de productos - solo filtro local
+                $('#searchProduct').on('keyup', function () {
+                    const term = $(this).val().toLowerCase();
+                    $('#productosTableModal tbody tr').each(function () {
+                        const text = $(this).text().toLowerCase();
+                        $(this).toggle(text.indexOf(term) > -1);
+                    });
+                });
+
+                // Agregar producto al detalle
+                $(document).on('click', '.agregar-producto', function () {
+                    const id = $(this).data('id');
+                    const codigo = $(this).data('codigo');
+                    const nombre = $(this).data('nombre');
+                    const precio = parseFloat($(this).data('precio')); // Convertir a número
+
+                    // Verificar si el producto ya está en el detalle
+                    if ($('#detalleTable tbody tr[data-id="' + id + '"]').length > 0) {
+                        alert('Este producto ya está en el detalle');
+                        return;
+                    }
+
+                    // Agregar fila al detalle
+                    const row = `
+                <tr data-id="${id}">
+                    <td>${nombre} <small class="text-muted">(${codigo})</small></td>
+                    <td>
+                        <input type="number" class="form-control cantidad" value="1" min="1" style="width: 80px;">
+                    </td>
+                    <td class="precio-unitario">${formatMoney(precio)}</td>
+                    <td class="subtotal">${formatMoney(precio)}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger eliminar-producto">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+
+                    $('#detalleTable tbody').append(row);
+
+                    // Aplicar deshabilitación si el formulario está deshabilitado
+                    if (formularioDeshabilitado) {
+                        $('#detalleTable .eliminar-producto').last().prop('disabled', true).addClass('disabled');
+                        $('#detalleTable input').last().prop('disabled', true);
+                    }
+
+                    // Limpiar cualquier mensaje de DataTable en la tabla de detalle
+                    $('#detalleTable tbody .dataTables_empty').remove();
+
+                    calcularTotal();
+
+                    // Cerrar modal
+                    $('#productosModal').modal('hide');
+                });
+
+                // Eliminar producto del detalle
+                $(document).on('click', '.eliminar-producto', function () {
+                    $(this).closest('tr').remove();
+                    calcularTotal();
+                });
+
+                // Actualizar subtotal al cambiar cantidad
+                $(document).on('change', '.cantidad', function () {
+                    const row = $(this).closest('tr');
+                    const precioText = row.find('.precio-unitario').text().replace('$', '').replace(',', '');
+                    const precio = parseFloat(precioText) || 0;
+                    const cantidad = parseInt($(this).val()) || 1;
+                    const subtotal = precio * cantidad;
+
+                    row.find('.subtotal').text(formatMoney(subtotal));
+                    calcularTotal();
+                });
+
+                // Formatear número como dinero
+                function formatMoney(amount) {
+                    // Asegurarse de que amount es un número
+                    const num = parseFloat(amount) || 0;
+                    return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                }
+
+                // Calcular total de la venta
+                function calcularTotal() {
+                    let subtotal = 0;
+
+                    $('#detalleTable tbody tr').each(function () {
+                        const subtotalText = $(this).find('.subtotal').text().replace('$', '').replace(',', '');
+                        const subtotalItem = parseFloat(subtotalText) || 0;
+                        subtotal += subtotalItem;
+                    });
+
+                    // Aplicar descuento
+                    const descuento = parseFloat($('#descuento').val()) || 0;
+                    const total = Math.max(0, subtotal - descuento);
+
+                    $('#totalVenta').text(formatMoney(total));
+                    $('#total').val(total.toFixed(2));
+                }
+
+                // Evento para recalcular cuando cambie el descuento
+                $('#descuento').on('input change', function () {
+                    calcularTotal();
+                });
+
+                // Preparar detalles para envío
+                function prepararDetalles() {
+                    console.log('Preparando detalles...');
+                    debugger
+                    // Validar que hay al menos un detalle
+                    if ($('#detalleTable tbody tr').length === 0) {
+                        alert('Debe agregar al menos un producto a la venta');
+                        return false;
+                    }
+
+                    const detallesContainer = $('#detallesHidden');
+                    detallesContainer.empty();
+
+                    let index = 0;
+                    $('#detalleTable tbody tr').each(function () {
+                        const productoId = $(this).data('id');
+                        const cantidad = $(this).find('.cantidad').val();
+                        const precioText = $(this).find('.precio-unitario').text().replace('$', '').replace(',', '');
+                        const precioUnitario = parseFloat(precioText) || 0;
+                        const subtotalText = $(this).find('.subtotal').text().replace('$', '').replace(',', '');
+                        const subtotal = parseFloat(subtotalText) || 0;
+
+                        console.log(`Detalle ${index}: ProductoId=${productoId}, Cantidad=${cantidad}, Precio=${precioUnitario}, Subtotal=${subtotal}`);
+
+                        // Crear campos ocultos para cada detalle
+                        detallesContainer.append(`
+                    <input type="hidden" name="detalles[${index}].producto.id" value="${productoId}">
+                    <input type="hidden" name="detalles[${index}].cantidad" value="${cantidad}">
+                    <input type="hidden" name="detalles[${index}].precioUnitario" value="${precioUnitario}">
+                    <input type="hidden" name="detalles[${index}].subtotal" value="${subtotal}">
+                `);
+                        index++;
+                    });
+
+                    console.log('Campos ocultos generados:', detallesContainer.html());
+                    return true; // Permitir el envío del formulario
+                }
+
+                // Hacer la función prepararDetalles global
+                window.prepararDetalles = prepararDetalles;
+
+                // Cargar detalles existentes cuando hay detalles guardados
+                /*[# th:if="${venta.detalles != null && !venta.detalles.isEmpty()}"]*/
+                /*[# th:each="detalle : ${venta.detalles}"]*/
+                var detalleExistente = {
+                    id: /*[[${detalle.producto != null ? detalle.producto.id : 0}]]*/ 0,
+                    codigo: /*[[${detalle.producto != null ? detalle.producto.codigo : ''}]]*/ '',
+                    nombre: /*[[${detalle.producto != null ? detalle.producto.nombre : 'Producto no encontrado'}]]*/ '',
+                    cantidad: /*[[${detalle.cantidad}]]*/ 1,
+                    precio: /*[[${detalle.precioUnitario}]]*/ 0
+                };
+
+                if (detalleExistente.id > 0) {
+                    const subtotal = detalleExistente.cantidad * detalleExistente.precio;
+                    const row = `
+                <tr data-id="${detalleExistente.id}">
+                    <td>${detalleExistente.nombre} <small class="text-muted">(${detalleExistente.codigo})</small></td>
+                    <td>
+                        <input type="number" class="form-control cantidad" value="${detalleExistente.cantidad}" min="1" style="width: 80px;">
+                    </td>
+                    <td class="precio-unitario">${formatMoney(detalleExistente.precio)}</td>
+                    <td class="subtotal">${formatMoney(subtotal)}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger eliminar-producto">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+                    $('#detalleTable tbody').append(row);
+                }
+                /*[/]*/
+                /*[/]*/
+
+                // Recalcular total después de cargar detalles existentes
+                calcularTotal();
+
+                // Función para aplicar deshabilitación después de cargar detalles
+                function aplicarDeshabilitacionDetalles() {
+                    if (formularioDeshabilitado) {
+                        console.log('Aplicando deshabilitación a detalles cargados');
+                        $('#detalleTable input').prop('disabled', true);
+                        $('#detalleTable .eliminar-producto').prop('disabled', true).addClass('disabled');
+                        $('#agregarProductoBtn').prop('disabled', true).addClass('disabled');
+                    }
+                }
+
+                // Aplicar deshabilitación después de cargar detalles
+                aplicarDeshabilitacionDetalles();
+
+                // Función para actualizar el comportamiento cuando cambie el tipo de documento
+                window.updateComportamiento = function () {
+                    const selectMov = document.getElementById('mov');
+                    const comportamientoInput = document.getElementById('comportamiento');
+                    const selectedOption = selectMov.options[selectMov.selectedIndex];
+
+                    if (selectedOption && selectedOption.dataset.comportamiento) {
+                        comportamientoInput.value = selectedOption.dataset.comportamiento;
+                        console.log('Comportamiento actualizado a:', selectedOption.dataset.comportamiento);
+                    } else {
+                        comportamientoInput.value = '';
+                    }
+                };
+            });
+        </script>
+
+        <style>
+            /* Botones modernos */
+            .btn-modern {
+                border: none;
+                border-radius: 8px;
+                padding: 8px 16px;
+                font-weight: 500;
+                font-size: 12px;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                position: relative;
+                overflow: hidden;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 90px;
+            }
+
+            .btn-modern:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                text-decoration: none;
+            }
+
+            .btn-modern:active {
+                transform: translateY(0);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .btn-content {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .btn-content i {
+                font-size: 14px;
+            }
+
+            /* Botón Guardar/Actualizar - Azul moderno */
+            .btn-primary-modern {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+
+            .btn-primary-modern:hover {
+                background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+                color: white;
+            }
+
+            /* Botón Afectar - Verde moderno */
+            .btn-success-modern {
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
+            }
+
+            .btn-success-modern:hover {
+                background: linear-gradient(135deg, #0e8678 0%, #2dd66b 100%);
+                color: white;
+            }
+
+            /* Botón Cancelar - Gris moderno */
+            .btn-secondary-modern {
+                background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+                color: white;
+            }
+
+            .btn-secondary-modern:hover {
+                background: linear-gradient(135deg, #5faef7 0%, #0770c7 100%);
+                color: white;
+            }
+
+            /* Efecto de ondas al hacer clic */
+            .btn-modern::before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 0;
+                height: 0;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.5);
+                transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
+                transform: translate(-50%, -50%);
+                z-index: 0;
+            }
+
+            .btn-modern:active::before {
+                width: 300px;
+                height: 300px;
+                top: 50%;
+                left: 50%;
+            }
+
+            /* Estilos para botones deshabilitados */
+            .btn-modern:disabled,
+            .btn-modern.disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+
+            .btn-modern:disabled::before,
+            .btn-modern.disabled::before {
+                opacity: 0.3;
+            }
+
+            /* Campos de formulario deshabilitados */
+            .form-control:disabled,
+            .form-select:disabled {
+                background-color: #f8f9fa;
+                border-color: #e9ecef;
+                color: #6c757d;
+                opacity: 0.8;
+            }
+
+            /* Botones deshabilitados */
+            .btn:disabled,
+            .btn.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                pointer-events: none;
+            }
+
+            /* Botones de eliminar deshabilitados específicamente */
+            .eliminar-producto:disabled,
+            .eliminar-producto.disabled {
+                opacity: 0.5 !important;
+                cursor: not-allowed !important;
+                pointer-events: none !important;
+                background-color: #dc3545 !important;
+                border-color: #dc3545 !important;
+            }
+
+            /* Estilo específico para campos deshabilitados */
+            input:disabled,
+            select:disabled,
+            textarea:disabled {
+                background-color: #e9ecef !important;
+                border-color: #ced4da !important;
+                color: #6c757d !important;
+                opacity: 0.6 !important;
+            }
+
+            /* Estilos para toasts más visibles */
+            .toast-container {
+                position: fixed !important;
+                top: 20px !important;
+                right: 20px !important;
+                z-index: 99999 !important;
+            }
+
+            .toast {
+                min-width: 350px !important;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                border: 2px solid rgba(255, 255, 255, 0.2) !important;
+            }
+
+            .toast.bg-success {
+                background-color: #198754 !important;
+            }
+
+            .toast.bg-danger {
+                background-color: #dc3545 !important;
+            }
+
+            .toast.bg-warning {
+                background-color: #fd7e14 !important;
+            }
+
+            .toast.bg-info {
+                background-color: #0dcaf0 !important;
+            }
+
+            /* Loading Overlay */
+            .loading-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.7);
+                z-index: 999999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .loading-content {
+                text-align: center;
+                color: white;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 2rem;
+                border-radius: 10px;
+                backdrop-filter: blur(10px);
+            }
+
+            .loading-text {
+                font-size: 1.1rem;
+                font-weight: 500;
+            }
+
+            .btn-content {
+                position: relative;
+                z-index: 1;
+            }
+
+            /* Badge del estatus final */
+            .status-badge-final {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+
+            .status-display .badge {
+                border-radius: 25px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                border: 2px solid transparent;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .status-display .badge.bg-warning {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+                color: white !important;
+                border-color: #ffeaa7;
+            }
+
+            .status-display .badge.bg-success {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+                color: white !important;
+                border-color: #badbcc;
+            }
+
+            .status-display .badge.bg-secondary {
+                background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%) !important;
+                color: #495057 !important;
+                border-color: #ced4da;
+            }
+
+            .status-display .badge.bg-danger {
+                background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%) !important;
+                color: #58151c !important;
+                border-color: #f5c2c7;
+            }
+
+            .status-display .badge i {
+                margin-right: 8px;
+                font-size: 18px;
+            }
+
+            /* Animación sutil para el badge */
+            .status-display .badge {
+                animation: pulseSubtle 2s infinite;
+            }
+
+            @keyframes pulseSubtle {
+                0% {
+                    transform: scale(1);
+                }
+
+                50% {
+                    transform: scale(1.02);
+                }
+
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            /* Responsive para móviles */
+            @media (max-width: 768px) {
+                .btn-modern {
+                    padding: 6px 12px;
+                    font-size: 11px;
+                    min-width: 70px;
+                }
+
+                .btn-content {
+                    gap: 4px;
+                }
+
+                .btn-content i {
+                    font-size: 12px;
+                }
+
+                .status-display .badge {
+                    font-size: 14px;
+                    padding: 10px 16px;
+                }
+            }
+        </style>
+
+        <script th:inline="javascript">
+            $(document).ready(function () {
+                // Mostrar toast si hay mensaje
+                /*<![CDATA[*/
+                // Variables ya definidas en el script anterior - no redefinir
+                /*]]>*/
+
+                console.log('=== DEBUG FORMULARIO ===');
+                console.log('Toast Debug:', {
+                    message: toastMessage,
+                    type: toastType,
+                    formularioDeshabilitado: formularioDeshabilitado,
+                    estatusVenta: estatusVenta
+                });
+
+                // Esperar a que se cargue completamente la página y las funciones
+                $(document).ready(function () {
+                    // Solo ocultar loading overlay al cargar la página si no hay toast message
+                    // (si hay toast message, significa que la página se cargó después de una operación)
+                    if (!toastMessage) {
+                        hideLoadingOverlay();
+                    }
+                    if (toastMessage) {
+                        console.log('Intentando mostrar toast:', toastMessage);
+
+                        // Ocultar loading overlay después de un breve delay para que se vea
+                        setTimeout(() => {
+                            hideLoadingOverlay();
+                        }, 500);
+
+                        // Verificar si showToast está disponible
+                        if (typeof showToast === 'function') {
+                            try {
+                                showToast(toastMessage, toastType, 5000);
+                                console.log('Toast mostrado correctamente');
+                            } catch (error) {
+                                console.error('Error al mostrar toast:', error);
+                                // Crear toast manualmente si falla
+                                createManualToast(toastMessage, toastType);
+                            }
+                        } else {
+                            console.log('showToast no disponible, creando toast manual');
+                            createManualToast(toastMessage, toastType);
+                        }
+                    }
+
+                    // Si el formulario está deshabilitado, deshabilitar todos los campos
+                    if (formularioDeshabilitado) {
+                        console.log('Deshabilitando formulario... formularioDeshabilitado =', formularioDeshabilitado);
+
+                        // Usar la función de main.js si existe
+                        if (typeof disableFormElements === 'function') {
+                            disableFormElements('#ventaForm');
+                            console.log('Usando disableFormElements de main.js');
+                        } else {
+                            // Fallback manual
+                            console.log('disableFormElements no disponible, deshabilitando manualmente');
+                            $('#ventaForm input, #ventaForm select, #ventaForm textarea, #ventaForm button').prop('disabled', true);
+                            $('#ventaForm .btn').addClass('disabled');
+                        }
+
+                        // También deshabilitar el botón de agregar productos
+                        $('#agregarProductoBtn').prop('disabled', true).addClass('disabled');
+                        // Deshabilitar acciones en la tabla de detalles
+                        $('#detalleTable .eliminar-producto').prop('disabled', true).addClass('disabled');
+                        // Deshabilitar todos los inputs en la tabla de detalles
+                        $('#detalleTable input').prop('disabled', true);
+                        // Deshabilitar modal de productos
+                        $('#agregarProductoBtn').attr('data-bs-toggle', '').attr('data-bs-target', '');
+
+                        console.log('Formulario deshabilitado completamente');
+                    } else {
+                        console.log('Formulario habilitado - formularioDeshabilitado =', formularioDeshabilitado);
+                    }
+
+                    // Aplicar deshabilitación después de cargar detalles (si es necesario)
+                    setTimeout(function () {
+                        if (formularioDeshabilitado) {
+                            console.log('Aplicando deshabilitación final después de timeout');
+                            aplicarDeshabilitacionDetalles();
+                        }
+                    }, 100);
+                });
+
+                // Función para mostrar loading overlay
+                function showLoadingOverlay(accion) {
+                    console.log('=== MOSTRANDO LOADING OVERLAY ===');
+                    console.log('Acción:', accion);
+
+                    const loadingMessage = document.getElementById('loadingMessage');
+
+                    if (accion === 'guardar') {
+                        loadingMessage.textContent = 'Guardando venta...';
+                    } else if (accion === 'afectar') {
+                        loadingMessage.textContent = 'Afectando venta...';
+                    } else {
+                        loadingMessage.textContent = 'Procesando...';
+                    }
+
+                    console.log('Mensaje del loading:', loadingMessage.textContent);
+                    $('#loadingOverlay').fadeIn(300);
+                    console.log('Loading overlay mostrado');
+                }
+
+                // Función para ocultar loading overlay
+                function hideLoadingOverlay() {
+                    console.log('=== OCULTANDO LOADING OVERLAY ===');
+                    $('#loadingOverlay').fadeOut(300);
+                    // Rehabilitar botones
+                    $('#btnGuardar, #btnAfectar').prop('disabled', false);
+                    console.log('Loading overlay ocultado y botones habilitados');
+                }
+
+                // Función para crear toast manual
+                function createManualToast(message, type) {
+                    const toastContainer = document.querySelector('.toast-container');
+                    if (!toastContainer) {
+                        console.error('Toast container no encontrado');
+                        alert(message); // Fallback final
+                        return;
+                    }
+
+                    const toastId = 'toast-manual-' + Date.now();
+                    const bgClass = getToastBgClass(type);
+                    const iconClass = getToastIcon(type);
+
+                    const toastHtml = `
+            <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 350px;">
+                <div class="d-flex">
+                    <div class="toast-body py-3 px-3">
+                        <i class="${iconClass} me-2" style="font-size: 1.1em;"></i>
+                        <strong>${message}</strong>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+
+                    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                    const toastElement = document.getElementById(toastId);
+
+                    if (toastElement && typeof bootstrap !== 'undefined') {
+                        const toast = new bootstrap.Toast(toastElement, {
+                            autohide: true,
+                            delay: 5000
+                        });
+
+                        toast.show();
+
+                        // Remover del DOM cuando se oculte
+                        toastElement.addEventListener('hidden.bs.toast', function () {
+                            toastElement.remove();
+                        });
+                    } else {
+                        console.error('Bootstrap no disponible o elemento no creado');
+                        alert(message); // Fallback final
+                    }
+                }
+
+                // Funciones auxiliares para toast
+                function getToastBgClass(type) {
+                    switch (type) {
+                        case 'success': return 'bg-success';
+                        case 'error': return 'bg-danger';
+                        case 'warning': return 'bg-warning';
+                        case 'info': return 'bg-info';
+                        default: return 'bg-info';
+                    }
+                }
+
+                function getToastIcon(type) {
+                    switch (type) {
+                        case 'success': return 'fas fa-check-circle';
+                        case 'error': return 'fas fa-exclamation-circle';
+                        case 'warning': return 'fas fa-exclamation-triangle';
+                        case 'info': return 'fas fa-info-circle';
+                        default: return 'fas fa-info-circle';
+                    }
+                }
+            });
+        </script>
+    </div>
+
+    <!-- Modal de selección de clientes -->
+    <div class="modal fade" id="clientesModal" tabindex="-1" aria-labelledby="clientesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="clientesModalLabel">Seleccionar Cliente</h5>
+                    <button type="button" class="btn-close cerrar-modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table id="clientesTable" class="table table-striped table-hover no-auto-datatable">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Cliente</th>
+                                    <th>Email</th>
+                                    <th>Teléfono</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Los datos se cargarán via AJAX -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary cerrar-modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts específicos para esta página -->
+    <th:block layout:fragment="scripts">
+        <script>
+        console.log('Script de ventas form iniciando...');
+        
+        $(document).ready(function() {
+            console.log('DOM Ready - jQuery funcionando');
+            let clientesTable;
+
+            // Verificar si el botón existe
+            const botonBuscar = $('#buscarClienteBtn');
+            console.log('Botón encontrado:', botonBuscar.length > 0);
+
+            // Manejar el click en el botón de búsqueda
+            $('#buscarClienteBtn').on('click', function(e) {
+                console.log('Click en botón de búsqueda');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                try {
+                    // Usar Bootstrap modal de forma más directa
+                    console.log('Intentando mostrar modal...');
+                    const modalElement = document.getElementById('clientesModal');
+                    if (modalElement) {
+                        // Agregar clases necesarias manualmente
+                        $(modalElement).addClass('show').css('display', 'block');
+                        $('body').addClass('modal-open');
+                        
+                        // Agregar backdrop
+                        if ($('.modal-backdrop').length === 0) {
+                            $('<div class="modal-backdrop fade show"></div>').appendTo('body');
+                        }
+                        
+                        console.log('Modal mostrado, inicializando tabla...');
+                        
+                        // Inicializar DataTable si no existe
+                        if (!clientesTable) {
+                            console.log('Inicializando DataTable...');
+                            setTimeout(function() {
+                                initializeClientesTable();
+                            }, 100);
+                        } else {
+                            console.log('Recargando DataTable...');
+                            clientesTable.ajax.reload();
+                        }
+                    } else {
+                        console.error('Modal element not found');
+                    }
+                } catch (error) {
+                    console.error('Error al abrir modal:', error);
+                }
+            });
+
+            // Cerrar modal manualmente
+            $(document).on('click', '.cerrar-modal', function() {
+                console.log('Cerrando modal...');
+                $('#clientesModal').removeClass('show').css('display', 'none');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+            });
+
+            // Cerrar modal al hacer click en el backdrop
+            $(document).on('click', '.modal-backdrop', function() {
+                console.log('Cerrando modal por backdrop...');
+                $('#clientesModal').removeClass('show').css('display', 'none');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+            });
+
+            // Función para inicializar la tabla de clientes
+            function initializeClientesTable() {
+                try {
+                    console.log('Creando DataTable...');
+                    clientesTable = $('#clientesTable').DataTable({
+                        ajax: {
+                            url: '/ventas/api/clientes',
+                            dataSrc: '',
+                            error: function(xhr, error, thrown) {
+                                console.error('Error al cargar clientes:', error);
+                                alert('Error al cargar la lista de clientes: ' + error);
+                            }
+                        },
+                        columns: [
+                            { data: 'codigo' },
+                            { 
+                                data: function(row) {
+                                    return getNombreCompleto(row);
+                                }
+                            },
+                            { data: 'email' },
+                            { data: 'telefono' },
+                            { 
+                                data: null, 
+                                render: function(data, type, row) {
+                                    return '<button type="button" class="btn btn-primary btn-sm seleccionar-cliente" ' +
+                                           'data-id="' + row.id + '" ' +
+                                           'data-codigo="' + row.codigo + '" ' +
+                                           'data-nombre="' + getNombreCompleto(row) + '">' +
+                                           'Seleccionar</button>';
+                                }
+                            }
+                        ],
+                        language: {
+                            "decimal": "",
+                            "emptyTable": "No hay datos disponibles en la tabla",
+                            "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+                            "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+                            "infoFiltered": "(filtrado de _MAX_ entradas totales)",
+                            "infoPostFix": "",
+                            "thousands": ",",
+                            "lengthMenu": "Mostrar _MENU_ entradas",
+                            "loadingRecords": "Cargando...",
+                            "processing": "Procesando...",
+                            "search": "Buscar:",
+                            "zeroRecords": "No se encontraron registros coincidentes",
+                            "paginate": {
+                                "first": "Primero",
+                                "last": "Último",
+                                "next": "Siguiente",
+                                "previous": "Anterior"
+                            }
+                        },
+                        responsive: true,
+                        pageLength: 10,
+                        destroy: true
+                    });
+                    console.log('DataTable creado exitosamente');
+                } catch (error) {
+                    console.error('Error al inicializar DataTable:', error);
+                }
+            }
+
+            // Función auxiliar para obtener nombre completo
+            function getNombreCompleto(cliente) {
+                let nombre = '';
+                if (cliente.primerNombre) nombre += cliente.primerNombre + ' ';
+                if (cliente.segundoNombre) nombre += cliente.segundoNombre + ' ';
+                if (cliente.primerApellido) nombre += cliente.primerApellido + ' ';
+                if (cliente.segundoApellido) nombre += cliente.segundoApellido;
+                return nombre.trim();
+            }
+
+            // Manejar selección de cliente
+            $(document).on('click', '.seleccionar-cliente', function() {
+                console.log('Cliente seleccionado');
+                const clienteId = $(this).data('id');
+                const clienteCodigo = $(this).data('codigo');
+                const clienteNombre = $(this).data('nombre');
+
+                console.log('Datos del cliente:', {id: clienteId, codigo: clienteCodigo, nombre: clienteNombre});
+
+                // Llenar los campos
+                $('#clienteId').val(clienteId);
+                $('#clienteDisplay').val(clienteCodigo + ' - ' + clienteNombre);
+
+                // Cerrar el modal manualmente
+                $('#clientesModal').removeClass('show').css('display', 'none');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+                
+                console.log('Cliente seleccionado y modal cerrado');
+            });
+
+            // Botón de test
+            $('#testModalBtn').on('click', function() {
+                console.log('Test button clicked');
+                $('#clientesModal').addClass('show').css('display', 'block');
+                $('body').addClass('modal-open');
+                if ($('.modal-backdrop').length === 0) {
+                    $('<div class="modal-backdrop fade show"></div>').appendTo('body');
+                }
+            });
+
+            // Limpiar cliente
+            $('#limpiarCliente').on('click', function() {
+                $('#clienteId').val('');
+                $('#clienteDisplay').val('');
+            });
+        });
+
+        console.log('Script de ventas form cargado completamente');
+        </script>
+    </th:block>
+
+</body>
+
+</html>

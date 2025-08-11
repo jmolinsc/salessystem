@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Comportamientos - Sistema de Ventas NickelFox</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1">Comportamientos</h2>
+            <p class="text-muted mb-0">Gestiona los comportamientos del sistema</p>
+        </div>
+        <a th:href="@{/comportamientos/nuevo}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Nuevo Comportamiento
+        </a>
+    </div>
+
+    <!-- Mensajes -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Filtros de búsqueda -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/comportamientos}" method="get" class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" class="form-control" name="search" 
+                           th:value="${search}" placeholder="Buscar por código, nombre, descripción o tipo...">
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="fas fa-search me-1"></i>Buscar
+                        </button>
+                        <a th:href="@{/comportamientos}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de comportamientos -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0">Lista de Comportamientos</h5>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(comportamientos)}" class="text-center py-4">
+                <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No se encontraron comportamientos</h5>
+                <p class="text-muted">No hay comportamientos registrados en el sistema.</p>
+                <a th:href="@{/comportamientos/nuevo}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Crear Primer Comportamiento
+                </a>
+            </div>
+
+            <div th:if="${!#lists.isEmpty(comportamientos)}" class="table-responsive">
+                <table class="table table-striped table-hover" id="comportamientosTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Afecta Stock</th>
+                            <th>Signo</th>
+                            <th>Estatus</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="comportamiento : ${comportamientos}">
+                            <td>
+                                <code th:text="${comportamiento.codigo}" class="text-primary"></code>
+                            </td>
+                            <td>
+                                <strong th:text="${comportamiento.nombre}"></strong>
+                                <div th:if="${comportamiento.descripcion}" class="text-muted small" th:text="${comportamiento.descripcion}"></div>
+                            </td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${comportamiento.tipo == 'INVENTARIO' ? 'bg-info' : comportamiento.tipo == 'VENTAS' ? 'bg-success' : 'bg-secondary'}"
+                                      th:text="${comportamiento.tipo}">
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${comportamiento.afectaStock} ? 'bg-warning' : 'bg-light text-dark'"
+                                      th:text="${comportamiento.afectaStockTexto}">
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${comportamiento.signoMovimiento == 1 ? 'bg-success' : comportamiento.signoMovimiento == -1 ? 'bg-danger' : 'bg-secondary'}"
+                                      th:text="${comportamiento.signoTexto}">
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${comportamiento.estatus == 'ACTIVO'} ? 'bg-success' : 'bg-danger'"
+                                      th:text="${comportamiento.estatus}">
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/comportamientos/editar/{id}(id=${comportamiento.id})}" 
+                                       class="btn btn-sm btn-outline-primary" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    <button th:if="${comportamiento.estatus == 'ACTIVO'}"
+                                            type="button" class="btn btn-sm btn-outline-warning btn-desactivar" 
+                                            title="Desactivar"
+                                            th:data-id="${comportamiento.id}" 
+                                            th:data-nombre="${comportamiento.nombre}">
+                                        <i class="fas fa-pause"></i>
+                                    </button>
+                                    
+                                    <button th:if="${comportamiento.estatus == 'INACTIVO'}"
+                                            type="button" class="btn btn-sm btn-outline-success btn-activar" 
+                                            title="Activar"
+                                            th:data-id="${comportamiento.id}" 
+                                            th:data-nombre="${comportamiento.nombre}">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar" 
+                                            title="Eliminar"
+                                            th:data-id="${comportamiento.id}" 
+                                            th:data-nombre="${comportamiento.nombre}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="none">
+        $(document).ready(function() {
+            $('#comportamientosTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json"
+                },
+                "pageLength": 25,
+                "responsive": true,
+                "order": [[1, "asc"]]
+            });
+
+            // Event listeners para los botones de acción
+            $(document).on('click', '.btn-eliminar', function() {
+                const id = $(this).data('id');
+                const nombre = $(this).data('nombre');
+                confirmarEliminacion(id, nombre);
+            });
+
+            $(document).on('click', '.btn-desactivar', function() {
+                const id = $(this).data('id');
+                const nombre = $(this).data('nombre');
+                confirmarDesactivar(id, nombre);
+            });
+
+            $(document).on('click', '.btn-activar', function() {
+                const id = $(this).data('id');
+                const nombre = $(this).data('nombre');
+                confirmarActivar(id, nombre);
+            });
+        });
+
+        function confirmarEliminacion(id, nombre) {
+            if (confirm(`¿Está seguro que desea eliminar el comportamiento "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+                window.location.href = /*[[@{/comportamientos/eliminar/}]]*/ '/comportamientos/eliminar/' + id;
+            }
+        }
+
+        function confirmarDesactivar(id, nombre) {
+            if (confirm(`¿Está seguro que desea desactivar el comportamiento "${nombre}"?`)) {
+                // Crear formulario dinámico para POST
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = /*[[@{/comportamientos/desactivar/}]]*/ '/comportamientos/desactivar/' + id;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function confirmarActivar(id, nombre) {
+            if (confirm(`¿Está seguro que desea activar el comportamiento "${nombre}"?`)) {
+                // Crear formulario dinámico para POST
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = /*[[@{/comportamientos/activar/}]]*/ '/comportamientos/activar/' + id;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

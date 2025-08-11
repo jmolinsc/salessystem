@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title != null ? title + ' - NickelFox Sales System' : 'NickelFox Sales System'}">NickelFox Sales System</title>
+    
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts - Material Design -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- DataTables CSS CDN -->
+    <link href="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.css" rel="stylesheet">
+    
+    <!-- DataTables Dark Mode Global Styles -->
+    <link th:href="@{/css/datatables-dark.css}" rel="stylesheet">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- NickelFox Official Template Styles -->
+    <style>
+        /* NickelFox Official Design System */
+        :root {
+            --primary-color: #5D87FF;
+            --primary-light: #ECF2FF;
+            --secondary-color: #49BEFF;
+            --secondary-light: #E8F7FF;
+            --success-color: #13DEB9;
+            --success-light: #E6FFFA;
+            --warning-color: #FFAE1F;
+            --warning-light: #FEF5E7;
+            --danger-color: #FA896B;
+            --danger-light: #FDEDE8;
+            --info-color: #539BFF;
+            --info-light: #EBF3FE;
+            --dark-color: #2A3547;
+            --muted-color: #5A6A85;
+            --border-color: #e5eaef;
+            --gray-100: #F9FAFC;
+            --gray-200: #F2F6FA;
+            --gray-300: #DFE5EF;
+            --white: #FFFFFF;
+            --sidebar-width: 250px; /* Reducido de 270px */
+            --header-height: 70px; /* Reducido de 80px */
+            --border-radius: 0.5rem; /* Reducido de 7px */
+            --box-shadow: 0px 2px 12px rgba(42, 53, 71, 0.15);
+            --box-shadow-sm: 0px 1px 6px rgba(42, 53, 71, 0.15);
+        }
+
+        /* Dark Theme Variables */
+        [data-theme="dark"] {
+            --primary-color: #5D87FF;
+            --primary-light: #1a2332;
+            --secondary-color: #49BEFF;
+            --secondary-light: #1a252e;
+            --success-color: #13DEB9;
+            --success-light: #1a2e2a;
+            --warning-color: #FFAE1F;
+            --warning-light: #2e291a;
+            --danger-color: #FA896B;
+            --danger-light: #2e221a;
+            --info-color: #539BFF;
+            --info-light: #1a2332;
+            --dark-color: #FFFFFF;
+            --muted-color: #B7C5D3;
+            --border-color: #2a3547;
+            --gray-100: #1a202c;
+            --gray-200: #2d3748;
+            --gray-300: #4a5568;
+            --white: #2a3547;
+            --box-shadow: 0px 3px 18px rgba(0, 0, 0, 0.3);
+            --box-shadow-sm: 0px 2px 9px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--gray-100);
+            color: var(--dark-color);
+            line-height: 1.6;
+            font-size: 13px; /* Reducido de 14px */
+            overflow-x: hidden;
+        }
+
+        /* Estilos compactos globales */
+        .compact-layout {
+            --bs-card-spacer-y: 0.75rem; /* Reducir padding de cards */
+            --bs-card-spacer-x: 1rem;
+            --bs-card-border-radius: 0.5rem;
+        }
+
+        /* Cards más compactos */
+        .card {
+            --bs-card-spacer-y: 0.75rem;
+            --bs-card-spacer-x: 1rem;
+            margin-bottom: 1rem !important;
+        }
+
+        .card-header {
+            padding: 0.75rem 1rem !important;
+            font-size: 0.875rem !important;
+        }
+
+        .card-body {
+            padding: 1rem !important;
+        }
+
+        /* Botones más pequeños */
+        .btn {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.813rem;
+            border-radius: 0.375rem;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        /* Formularios más compactos */
+        .form-control, .form-select {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.813rem;
+            line-height: 1.4;
+        }
+
+        .form-label {
+            font-size: 0.813rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Tablas más compactas */
+        .table {
+            --bs-table-cell-padding-y: 0.5rem;
+            --bs-table-cell-padding-x: 0.75rem;
+            font-size: 0.813rem;
+        }
+
+        .table th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.5rem 0.75rem !important;
+        }
+
+        .table td {
+            padding: 0.5rem 0.75rem !important;
+        }
+
+        /* DataTables más compactas */
+        .dataTables_wrapper {
+            font-size: 0.813rem;
+        }
+
+        .dataTables_filter input {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.75rem !important;
+        }
+
+        .dataTables_length select {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.75rem !important;
+        }
+
+        .dataTables_info {
+            font-size: 0.75rem !important;
+        }
+
+        .paginate_button {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.75rem !important;
+        }
+
+        /* Badges más pequeños */
+        .badge {
+            font-size: 0.688rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        /* Títulos más pequeños */
+        h1 { font-size: 1.75rem; }
+        h2 { font-size: 1.5rem; }
+        h3 { font-size: 1.25rem; }
+        h4 { font-size: 1.1rem; }
+        h5 { font-size: 1rem; }
+        h6 { font-size: 0.875rem; }
+
+        /* Espaciado reducido */
+        .mb-4 { margin-bottom: 1rem !important; }
+        .mb-3 { margin-bottom: 0.75rem !important; }
+        .mb-2 { margin-bottom: 0.5rem !important; }
+        .py-3 { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
+        .py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+
+        /* Sidebar más compacto */
+        .sidebar {
+            --sidebar-width: 250px; /* Reducido de 270px */
+        }
+
+        .sidebar-brand {
+            padding: 20px 25px; /* Reducido de 25px 30px */
+        }
+
+        .sidebar-brand h4 {
+            font-size: 1.25rem; /* Reducido de 22px */
+        }
+
+        .nav-link {
+            padding: 0.5rem 1.5rem; /* Reducido */
+            font-size: 0.813rem;
+        }
+
+        /* Header más compacto */
+        .header {
+            --header-height: 70px; /* Reducido de 80px */
+            padding: 0.75rem 1.5rem;
+        }
+
+        /* Iconos más pequeños */
+        .fa-3x { font-size: 2rem !important; }
+        .fa-2x { font-size: 1.5rem !important; }
+
+        /* Dropdown menus más compactos */
+        .dropdown-item {
+            padding: 0.375rem 1rem;
+            font-size: 0.813rem;
+        }
+
+        /* Modal más compacto */
+        .modal-header {
+            padding: 0.75rem 1rem;
+        }
+
+        .modal-body {
+            padding: 1rem;
+        }
+
+        .modal-footer {
+            padding: 0.75rem 1rem;
+        }
+
+        /* Aplicar estilos compactos globalmente */
+        html {
+            font-size: 14px; /* Base font size reducida */
+        }
+
+        @media (max-width: 1200px) {
+            html { font-size: 13px; }
+        }
+
+        @media (max-width: 992px) {
+            html { font-size: 12px; }
+        }
+
+        /* Official NickelFox Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--white);
+            z-index: 1000;
+            transition: all 0.25s ease;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            box-shadow: var(--box-shadow-sm);
+        }
+
+        .sidebar-brand {
+            padding: 20px 25px; /* Reducido de 25px 30px */
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand .brand-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .sidebar-brand .brand-logo img {
+            width: 30px; /* Reducido de 35px */
+            height: 30px; /* Reducido de 35px */
+            margin-right: 10px; /* Reducido de 12px */
+        }
+
+        .sidebar-brand h4 {
+            color: var(--dark-color);
+            font-weight: 700;
+            font-size: 1.25rem; /* Reducido de 22px */
+            margin: 0;
+        }
+
+        .sidebar-brand small {
+            color: var(--muted-color);
+            font-size: 0.75rem; /* Reducido de 12px */
+            font-weight: 400;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0 0 0; /* Reducido de 30px */
+        }
+
+        .nav-item {
+            margin: 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 25px; /* Reducido de 13px 30px */
+            color: var(--muted-color) !important;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            font-weight: 500;
+            font-size: 0.813rem; /* Reducido de 14px */
+            border: none;
+            background: transparent;
+        }
+
+        .nav-link:hover {
+            background: var(--primary-light);
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link.active {
+            background: var(--primary-light);
+            color: var(--primary-color) !important;
+            border-right: 3px solid var(--primary-color);
+        }
+
+        .nav-link i {
+            width: 18px; /* Reducido de 20px */
+            margin-right: 12px; /* Reducido de 15px */
+            font-size: 0.875rem; /* Reducido de 16px */
+            text-align: center;
+        }
+
+        /* Submenu Styles */
+        .submenu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: var(--gray-200);
+        }
+
+        .nav-item:hover .submenu {
+            max-height: 500px;
+        }
+
+        .submenu-link {
+            padding: 8px 25px 8px 55px !important; /* Reducido de 10px 30px 10px 65px */
+            font-size: 0.75rem !important; /* Reducido de 13px */
+            color: var(--muted-color) !important;
+        }
+
+        .submenu-link:hover {
+            background: var(--primary-light) !important;
+            color: var(--primary-color) !important;
+        }
+
+        .submenu-link.active {
+            background: var(--primary-light) !important;
+            color: var(--primary-color) !important;
+            border-right: 3px solid var(--primary-color);
+        }
+
+        /* Navigation Section Headers */
+        .nav-section-header {
+            padding: 20px 30px 10px 30px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            transition: all 0.25s ease;
+            background: var(--gray-100);
+        }
+
+        /* Top Header - Official NickelFox Style */
+        .top-header {
+            background: var(--white);
+            padding: 0 25px; /* Reducido de 30px */
+            box-shadow: var(--box-shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: var(--header-height);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--dark-color);
+            font-size: 18px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .breadcrumb-container h4 {
+            color: var(--dark-color);
+            font-weight: 600;
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .breadcrumb-text {
+            color: var(--muted-color);
+            font-size: 13px;
+            margin: 0;
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-search {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-search input {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 8px 40px 8px 15px;
+            width: 250px;
+            font-size: 13px;
+            background: var(--gray-200);
+        }
+
+        .header-search input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: var(--white);
+        }
+
+        .header-search i {
+            position: absolute;
+            right: 12px;
+            color: var(--muted-color);
+            font-size: 14px;
+        }
+
+        /* Notifications */
+        .notification-icon {
+            position: relative;
+            color: var(--muted-color);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .notification-icon:hover {
+            color: var(--primary-color);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger-color);
+            color: var(--white);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* User Profile Dropdown */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            transition: all 0.25s ease;
+        }
+
+        .user-profile:hover {
+            background: var(--gray-200);
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-info h6 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .user-info span {
+            font-size: 12px;
+            color: var(--muted-color);
+        }
+
+        /* Page Content */
+        .page-content {
+            padding: 20px; /* Reducido de 30px */
+        }
+
+        /* Official NickelFox Cards */
+        .card-custom {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 0;
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.25s ease;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .card-custom:hover {
+            box-shadow: 0px 5px 25px rgba(42, 53, 71, 0.2);
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--white);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin: 0;
+        }
+
+        .card-body-custom {
+            padding: 30px;
+        }
+
+        /* Buttons - Official NickelFox Style */
+        .btn-primary-custom {
+            background: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .btn-primary-custom:hover {
+            background: #4570EA;
+            border-color: #4570EA;
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .btn-success-custom {
+            background: var(--success-color);
+            border: 1px solid var(--success-color);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.25s ease;
+        }
+
+        .btn-success-custom:hover {
+            background: #11C9A3;
+            border-color: #11C9A3;
+            color: var(--white);
+        }
+
+        .btn-warning-custom {
+            background: var(--warning-color);
+            border: 1px solid var(--warning-color);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.25s ease;
+        }
+
+        .btn-warning-custom:hover {
+            background: #E8960B;
+            border-color: #E8960B;
+            color: var(--white);
+        }
+
+        .btn-danger-custom {
+            background: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.25s ease;
+        }
+
+        .btn-danger-custom:hover {
+            background: #F87557;
+            border-color: #F87557;
+            color: var(--white);
+        }
+
+        /* Table Styles - Official NickelFox */
+        .table-custom {
+            border: none;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .table-custom thead th {
+            border: none;
+            background: var(--gray-200);
+            color: var(--dark-color);
+            font-weight: 600;
+            padding: 15px 20px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table-custom tbody td {
+            border: none;
+            padding: 20px;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-custom tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-custom tbody tr:hover {
+            background: var(--gray-200);
+        }
+
+        /* Form Styles - Official NickelFox */
+        .form-control-custom {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 12px 15px;
+            transition: all 0.25s ease;
+            font-size: 14px;
+            background: var(--white);
+        }
+
+        .form-control-custom:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(93, 135, 255, 0.15);
+            outline: none;
+            background: var(--white);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        /* Specific form label styles for better dark mode support */
+        label.form-label,
+        .form-label,
+        label {
+            color: var(--dark-color) !important;
+            font-weight: 500;
+        }
+
+        /* Ensure form labels are visible in dark mode */
+        [data-theme="dark"] .form-label,
+        [data-theme="dark"] label.form-label,
+        [data-theme="dark"] label {
+            color: #FFFFFF !important;
+        }
+
+        /* Light mode explicit styling */
+        [data-theme="light"] .form-label,
+        [data-theme="light"] label.form-label,
+        [data-theme="light"] label {
+            color: #2A3547 !important;
+        }
+
+        /* Additional form elements styling for dark mode */
+        [data-theme="dark"] .form-control,
+        [data-theme="dark"] .form-select,
+        [data-theme="dark"] .form-control:focus,
+        [data-theme="dark"] .form-select:focus {
+            background-color: var(--gray-200);
+            border-color: var(--border-color);
+            color: var(--dark-color);
+        }
+
+        [data-theme="dark"] .form-control::placeholder {
+            color: var(--muted-color);
+        }
+
+        /* Card styling for better dark mode visibility */
+        [data-theme="dark"] .card {
+            background-color: var(--white);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .card-header {
+            background-color: var(--gray-200);
+            border-color: var(--border-color);
+        }
+
+        /* Text utilities for dark mode */
+        [data-theme="dark"] .text-dark {
+            color: #FFFFFF !important;
+        }
+
+        [data-theme="dark"] .text-muted {
+            color: var(--muted-color) !important;
+        }
+
+        /* Table styling for dark mode */
+        [data-theme="dark"] .table {
+            color: var(--dark-color);
+        }
+
+        [data-theme="dark"] .table-light {
+            background-color: var(--gray-200) !important;
+            color: var(--dark-color) !important;
+        }
+
+        [data-theme="dark"] .table-light th {
+            color: var(--dark-color) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .table-bordered {
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .table-bordered td,
+        [data-theme="dark"] .table-bordered th {
+            border-color: var(--border-color) !important;
+        }
+
+        /* Font weight utilities */
+        [data-theme="dark"] .font-weight-bold,
+        [data-theme="dark"] .fw-bold {
+            color: var(--dark-color) !important;
+        }
+
+        /* Badge styling for dark mode */
+        [data-theme="dark"] .badge.bg-warning {
+            color: #000000 !important;
+        }
+
+        /* Icon color adjustments */
+        [data-theme="dark"] .text-muted i {
+            color: var(--muted-color) !important;
+        }
+
+        /* Cards with border styles for dark mode */
+        [data-theme="dark"] .border-left-danger,
+        [data-theme="dark"] .border-left-warning,
+        [data-theme="dark"] .border-left-success,
+        [data-theme="dark"] .border-left-info,
+        [data-theme="dark"] .border-left-primary {
+            background-color: var(--white) !important;
+        }
+
+        /* Small text elements */
+        [data-theme="dark"] small {
+            color: var(--muted-color) !important;
+        }
+
+        [data-theme="dark"] .small {
+            color: var(--muted-color) !important;
+        }
+
+        /* Font monospace for dark mode */
+        [data-theme="dark"] .font-monospace {
+            color: var(--dark-color) !important;
+        }
+
+        /* Text alignment utilities that need color fixes */
+        [data-theme="dark"] .text-center,
+        [data-theme="dark"] .text-right,
+        [data-theme="dark"] .text-left {
+            color: inherit !important;
+        }
+
+        /* DataTables styling for dark mode */
+        [data-theme="dark"] .dataTables_wrapper {
+            color: var(--dark-color) !important;
+        }
+
+        [data-theme="dark"] .dataTables_info,
+        [data-theme="dark"] .dataTables_length,
+        [data-theme="dark"] .dataTables_filter {
+            color: var(--dark-color) !important;
+        }
+
+        [data-theme="dark"] .dataTables_filter input {
+            background-color: var(--gray-200) !important;
+            border-color: var(--border-color) !important;
+            color: var(--dark-color) !important;
+        }
+
+        /* Badges - Official NickelFox */
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success { 
+            background: var(--success-light); 
+            color: var(--success-color); 
+        }
+        .badge-warning { 
+            background: var(--warning-light); 
+            color: var(--warning-color); 
+        }
+        .badge-danger { 
+            background: var(--danger-light); 
+            color: var(--danger-color); 
+        }
+        .badge-primary { 
+            background: var(--primary-light); 
+            color: var(--primary-color); 
+        }
+        .badge-info { 
+            background: var(--info-light); 
+            color: var(--info-color); 
+        }
+
+        /* Alerts - Official NickelFox */
+        .alert-custom {
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alert-success-custom {
+            background: var(--success-light);
+            color: var(--success-color);
+        }
+
+        .alert-danger-custom {
+            background: var(--danger-light);
+            color: var(--danger-color);
+        }
+
+        .alert-warning-custom {
+            background: var(--warning-light);
+            color: var(--warning-color);
+        }
+
+        .alert-info-custom {
+            background: var(--info-light);
+            color: var(--info-color);
+        }
+
+        /* Responsive Design - Official NickelFox */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-toggle {
+                display: block !important;
+            }
+            
+            .header-search {
+                display: none;
+            }
+            
+            .page-content {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .header-actions {
+                gap: 10px;
+            }
+            
+            .user-info {
+                display: none;
+            }
+            
+            .page-content {
+                padding: 15px;
+            }
+        }
+
+        /* Utilities */
+        .text-truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .shadow-sm {
+            box-shadow: var(--box-shadow-sm) !important;
+        }
+
+        .shadow {
+            box-shadow: var(--box-shadow) !important;
+        }
+
+        /* Custom Scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--muted-color);
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        /* Dashboard specific styles */
+        .stats-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.25s ease;
+        }
+
+        .stats-card:hover {
+            box-shadow: 0px 5px 25px rgba(42, 53, 71, 0.2);
+        }
+
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--white);
+        }
+
+        .stats-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin: 15px 0 5px 0;
+        }
+
+        .stats-label {
+            color: var(--muted-color);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .stats-trend {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .trend-up {
+            color: var(--success-color);
+        }
+
+        .trend-down {
+            color: var(--danger-color);
+        }
+    </style>
+    
+    <!-- Additional page-specific styles -->
+    <th:block layout:fragment="styles"></th:block>
+</head>
+<body>
+    <!-- Official NickelFox Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <a href="/dashboard" class="brand-logo">
+                <div style="width: 35px; height: 35px; background: var(--primary-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                    <i class="fas fa-chart-line text-white"></i>
+                </div>
+                <div>
+                    <h4>NickelFox</h4>
+                    <small>Sales System</small>
+                </div>
+            </a>
+        </div>
+        
+        <ul class="sidebar-nav">
+            <li class="nav-section-header">Main Navigation</li>
+            <!-- Dashboard siempre visible -->
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/dashboard}" 
+                   th:classappend="${currentPath == '/dashboard' ? 'active' : ''}">
+                    <i class="fas fa-chart-pie"></i>
+                    Dashboard
+                </a>
+            </li>
+            
+            <!-- Menús dinámicos desde base de datos -->
+            <th:block th:each="menuItem : ${menuItems}">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="${menuItem.ruta}"
+                       th:classappend="${#strings.startsWith(currentPath, menuItem.ruta) ? 'active' : ''}">
+                        <i th:class="${menuItem.icono}"></i>
+                        <span th:text="${menuItem.nombre}"></span>
+                    </a>
+                    
+                    <!-- Submenús -->
+                    <ul th:if="${menuItem.subMenus != null and !#lists.isEmpty(menuItem.subMenus)}" class="submenu">
+                        <li th:each="subItem : ${menuItem.subMenus}" class="nav-item">
+                            <a class="nav-link submenu-link" th:href="${subItem.ruta}"
+                               th:classappend="${#strings.startsWith(currentPath, subItem.ruta) ? 'active' : ''}">
+                                <i th:class="${subItem.icono}"></i>
+                                <span th:text="${subItem.nombre}"></span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </th:block>
+            
+            <!-- Theme Toggle -->
+            <li class="nav-section-header">Preferences</li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" id="themeToggle">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                    <span id="themeText">Dark Mode</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Official NickelFox Header -->
+        <div class="top-header">
+            <div class="header-left">
+                <button class="mobile-toggle" id="toggleSidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="breadcrumb-container">
+                    <h4 th:text="${pageTitle != null ? pageTitle : 'Dashboard'}">Dashboard</h4>
+                    <p class="breadcrumb-text" th:text="${breadcrumb != null ? breadcrumb : 'Welcome to NickelFox Sales System'}">Welcome to NickelFox Sales System</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <!-- Search Bar -->
+                <div class="header-search">
+                    <input type="text" placeholder="Search anything...">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <!-- Notifications -->
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                
+                <!-- User Profile Dropdown -->
+                <div class="dropdown">
+                    <div class="user-profile" data-bs-toggle="dropdown">
+                        <div class="user-avatar">
+                            <span sec:authentication="name">A</span>
+                        </div>
+                        <div class="user-info">
+                            <h6 sec:authentication="name">Admin User</h6>
+                            <span>Administrator</span>
+                        </div>
+                        <i class="fas fa-chevron-down" style="margin-left: 8px; font-size: 12px; color: var(--muted-color);"></i>
+                    </div>
+                    <ul class="dropdown-menu shadow">
+                        <li><a class="dropdown-item" href="/profile"><i class="fas fa-user me-2"></i>My Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings"><i class="fas fa-cog me-2"></i>Account Settings</a></li>
+                        <li><a class="dropdown-item" href="/help"><i class="fas fa-question-circle me-2"></i>Help</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="post" action="/logout" style="display: inline;">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div th:replace="~{fragments/messages :: messages}"></div>
+
+        <!-- Page Content -->
+        <div class="page-content fade-in">
+            <div layout:fragment="content">
+                <!-- Page content will be inserted here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 99999;">
+        <!-- Los toasts se insertan aquí dinámicamente -->
+    </div>
+
+    <!-- Scripts -->
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- DataTables JS CDN -->
+    <script src="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.js"></script>
+    
+    <!-- DataTables Dark Mode Global Functions -->
+    <script th:src="@{/js/datatables-dark.js}"></script>
+    
+    <!-- Page-specific JS files -->
+    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/ventas.js}"></script>
+    <script th:src="@{/js/productos.js}"></script>
+    <script th:src="@{/js/layout-nickelfox.js}"></script>
+
+
+    <!-- Additional page-specific scripts -->
+    <th:block layout:fragment="scripts"></th:block>
+</body>
+</html>

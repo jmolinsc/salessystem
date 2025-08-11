@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title th:text="${producto.id != null ? 'Edit Product - NickelFox Sales System' : 'New Product - NickelFox Sales System'}">Product</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1" th:text="${producto.id != null ? 'Edit Product' : 'New Product'}">Product</h2>
+            <p class="text-muted mb-0">Manage your product information</p>
+        </div>
+        <a th:href="@{/productos}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Back to Products
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0" th:text="${producto.id != null ? 'Edit Product Information' : 'Product Information'}">Product Information</h5>
+        </div>
+        <div class="card-body">
+                        <!-- Error Messages -->
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        
+                        <form th:action="@{/productos/guardar}" th:object="${producto}" method="post" id="productoForm" class="row g-3">
+                            <input type="hidden" th:field="*{id}" />
+                            
+                            <div class="col-md-6">
+                                <label for="codigo" class="form-label">Product Code *</label>
+                                <input type="text" class="form-control" th:field="*{codigo}" id="codigo" 
+                                       placeholder="e.g. PROD001" required maxlength="20">
+                                <div class="invalid-feedback" id="codigoError">
+                                    Product code is required.
+                                </div>
+                                <div class="valid-feedback" id="codigoSuccess" style="display: none;">
+                                    Code available.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="categoriaId" class="form-label">Category *</label>
+                                <select class="form-select" name="categoriaId" id="categoriaId" required>
+                                    <option value="">Select a category</option>
+                                    <option th:each="cat : ${categorias}" 
+                                            th:value="${cat.getId()}" 
+                                            th:text="${cat.nombre}"
+                                            th:selected="${producto.categoria != null and producto.categoria.getId() == cat.getId()}">
+                                        Category
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Category is required.
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="nombre" class="form-label">Product Name *</label>
+                                <input type="text" class="form-control" th:field="*{nombre}" id="nombre" 
+                                       placeholder="Product name" required maxlength="100">
+                                <div class="invalid-feedback">
+                                    Product name is required.
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="descripcion" class="form-label">Description</label>
+                                <textarea class="form-control" th:field="*{descripcion}" id="descripcion" 
+                                          rows="3" placeholder="Product description" maxlength="500"></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="precio" class="form-label">Price *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" th:field="*{precio}" id="precio" 
+                                           placeholder="0.00" step="0.01" min="0" required>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Price is required and must be greater than 0.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="stock" class="form-label">Stock *</label>
+                                <input type="number" class="form-control" th:field="*{stock}" id="stock" 
+                                       placeholder="0" min="0" required>
+                                <div class="invalid-feedback">
+                                    Stock is required and must be greater than or equal to 0.
+                                </div>
+                            </div>
+
+                            <!-- Nuevos campos mejorados -->
+                            <div class="col-md-4">
+                                <label for="unidad" class="form-label">Unidad de Medida</label>
+                                <select class="form-select" th:field="*{unidad}" id="unidad">
+                                    <option value="">Seleccionar unidad...</option>
+                                    <option value="PIEZA">Pieza</option>
+                                    <option value="KG">Kilogramo</option>
+                                    <option value="LT">Litro</option>
+                                    <option value="MT">Metro</option>
+                                    <option value="M2">Metro Cuadrado</option>
+                                    <option value="M3">Metro Cúbico</option>
+                                    <option value="CAJA">Caja</option>
+                                    <option value="PAQUETE">Paquete</option>
+                                    <option value="DOCENA">Docena</option>
+                                    <option value="UNIDAD">Unidad</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="fabricanteId" class="form-label">Fabricante</label>
+                                <div class="input-group">
+                                    <select class="form-select" name="fabricanteId" id="fabricanteId">
+                                        <option value="">Seleccionar fabricante...</option>
+                                        <option th:each="fab : ${fabricantes}" 
+                                                th:value="${fab.getId()}" 
+                                                th:text="${fab.nombre}"
+                                                th:selected="${producto.fabricante != null and producto.fabricante.getId() == fab.getId()}">
+                                            Fabricante
+                                        </option>
+                                    </select>
+                                    <a href="/fabricantes/nuevo" target="_blank" class="btn btn-outline-primary" title="Nuevo Fabricante">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                </div>
+                                <div class="form-text">Si no encuentra el fabricante, puede <a href="/fabricantes/nuevo" target="_blank">crear uno nuevo</a></div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="prodFamiliaId" class="form-label">Familia de Producto</label>
+                                <div class="input-group">
+                                    <select class="form-select" name="prodFamiliaId" id="prodFamiliaId">
+                                        <option value="">Seleccionar familia...</option>
+                                        <option th:each="familia : ${prodFamilias}" 
+                                                th:value="${familia.getId()}" 
+                                                th:text="${familia.nombre}"
+                                                th:selected="${producto.prodFamilia != null and producto.prodFamilia.getId() == familia.getId()}">
+                                            Familia
+                                        </option>
+                                    </select>
+                                    <a href="/prodfamilias/nueva" target="_blank" class="btn btn-outline-primary" title="Nueva Familia">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                </div>
+                                <div class="form-text">Si no encuentra la familia, puede <a href="/prodfamilias/nueva" target="_blank">crear una nueva</a></div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="tipo" class="form-label">Tipo de Producto</label>
+                                <select class="form-select" th:field="*{tipo}" id="tipo">
+                                    <option value="">Seleccionar tipo...</option>
+                                    <option value="NORMAL">Normal</option>
+                                    <option value="SERIE">Serie</option>
+                                    <option value="MATERIA_PRIMA">Materia Prima</option>
+                                    <option value="PRODUCTO_TERMINADO">Producto Terminado</option>
+                                    <option value="INSUMO">Insumo</option>
+                                    <option value="HERRAMIENTA">Herramienta</option>
+                                    <option value="EQUIPO">Equipo</option>
+                                    <option value="CONSUMIBLE">Consumible</option>
+                                    <option value="SERVICIO">Servicio</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="estatus" class="form-label">Estatus</label>
+                                <select class="form-select" th:field="*{estatus}" id="estatus">
+                                    <option value="ACTIVO">Activo</option>
+                                    <option value="INACTIVO">Inactivo</option>
+                                    <option value="DESCONTINUADO">Descontinuado</option>
+                                    <option value="AGOTADO">Agotado</option>
+                                    <option value="EN_REVISION">En Revisión</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="fechaAlta" class="form-label">Fecha de Alta</label>
+                                <input type="datetime-local" class="form-control" th:field="*{fechaAlta}" id="fechaAlta">
+                                <div class="form-text">Fecha de registro del producto</div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i> 
+                                    <span th:text="${producto.id != null ? 'Update Product' : 'Save Product'}">Save Product</span>
+                                </button>
+                                <a th:href="@{/productos}" class="btn btn-outline-secondary ms-2">
+                                    <i class="fas fa-times me-1"></i> Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Product form loaded successfully');
+            
+            // Referencias a elementos del DOM
+            const form = document.getElementById('productoForm');
+            const codigoInput = document.getElementById('codigo');
+            const nombreInput = document.getElementById('nombre');
+            const productoId = document.querySelector('input[name="id"]').value;
+            const isNewProduct = !productoId;
+            
+            // Validación en tiempo real del código
+            let codigoTimeout;
+            codigoInput.addEventListener('input', function() {
+                clearTimeout(codigoTimeout);
+                codigoTimeout = setTimeout(() => {
+                    validateCodigo();
+                }, 500); // Esperar 500ms después de que el usuario deje de escribir
+            });
+            
+            function validateCodigo() {
+                const codigo = codigoInput.value.trim();
+                if (!codigo) return;
+                
+                const url = `/productos/validar-codigo?codigo=${encodeURIComponent(codigo)}` + 
+                           (productoId ? `&id=${productoId}` : '');
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        const codigoError = document.getElementById('codigoError');
+                        const codigoSuccess = document.getElementById('codigoSuccess');
+                        
+                        if (data.existe) {
+                            codigoInput.classList.add('is-invalid');
+                            codigoInput.classList.remove('is-valid');
+                            codigoError.textContent = 'This code already exists. Please enter a different code.';
+                            codigoError.style.display = 'block';
+                            codigoSuccess.style.display = 'none';
+                        } else {
+                            codigoInput.classList.remove('is-invalid');
+                            codigoInput.classList.add('is-valid');
+                            codigoError.style.display = 'none';
+                            codigoSuccess.style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error validating codigo:', error);
+                    });
+            }
+            
+            // Validación del formulario
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                if (validateForm()) {
+                    // Verificar que el código no existe antes de enviar
+                    if (codigoInput.classList.contains('is-invalid')) {
+                        alert('Please correct the errors before saving.');
+                        return;
+                    }
+                    form.submit();
+                }
+                
+                form.classList.add('was-validated');
+            });
+            
+            function validateForm() {
+                let isValid = true;
+                
+                // Validar código
+                const codigo = document.getElementById('codigo');
+                if (!codigo.value.trim()) {
+                    isValid = false;
+                }
+                
+                // Validar nombre
+                const nombre = document.getElementById('nombre');
+                if (!nombre.value.trim()) {
+                    isValid = false;
+                }
+                
+                // Validar categoría
+                const categoria = document.getElementById('categoriaId');
+                if (!categoria.value) {
+                    isValid = false;
+                }
+                
+                // Validar precio
+                const precio = document.getElementById('precio');
+                if (!precio.value || parseFloat(precio.value) <= 0) {
+                    isValid = false;
+                }
+                
+                // Validar stock
+                const stock = document.getElementById('stock');
+                if (!stock.value || parseInt(stock.value) < 0) {
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+            
+            // Auto-generar código si está vacío (solo para productos nuevos)
+            if (isNewProduct && !codigoInput.value) {
+                nombreInput.addEventListener('blur', function() {
+                    if (!codigoInput.value && nombreInput.value) {
+                        // Generar código basado en el nombre
+                        const codigo = generateProductCode(nombreInput.value);
+                        codigoInput.value = codigo;
+                        validateCodigo(); // Validar el código generado
+                    }
+                });
+            }
+            
+            function generateProductCode(nombre) {
+                // Tomar las primeras 3 letras del nombre y agregar número aleatorio
+                const prefix = nombre.substring(0, 3).toUpperCase();
+                const suffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                return prefix + suffix;
+            }
+            
+            // === MEJORAS PARA NUEVOS CAMPOS ===
+            
+            // Establecer fecha actual si está vacía (solo para productos nuevos)
+            const fechaAltaInput = document.getElementById('fechaAlta');
+            if (fechaAltaInput && !fechaAltaInput.value && isNewProduct) {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                fechaAltaInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+            
+            // Establecer estatus por defecto
+            const estatusSelect = document.getElementById('estatus');
+            if (estatusSelect && !estatusSelect.value && isNewProduct) {
+                estatusSelect.value = 'ACTIVO';
+            }
+            
+            // Sugerir unidad basada en el tipo de producto
+            const tipoSelect = document.getElementById('tipo');
+            const unidadSelect = document.getElementById('unidad');
+            
+            if (tipoSelect && unidadSelect) {
+                tipoSelect.addEventListener('change', function() {
+                    const tipo = this.value;
+                    let sugerencia = '';
+                    
+                    switch(tipo) {
+                        case 'NORMAL':
+                            sugerencia = 'PIEZA';
+                            break;
+                        case 'SERIE':
+                            sugerencia = 'UNIDAD';
+                            break;
+                        case 'MATERIA_PRIMA':
+                            sugerencia = 'KG';
+                            break;
+                        case 'PRODUCTO_TERMINADO':
+                            sugerencia = 'PIEZA';
+                            break;
+                        case 'INSUMO':
+                            sugerencia = 'UNIDAD';
+                            break;
+                        case 'HERRAMIENTA':
+                            sugerencia = 'PIEZA';
+                            break;
+                        case 'EQUIPO':
+                            sugerencia = 'UNIDAD';
+                            break;
+                        case 'CONSUMIBLE':
+                            sugerencia = 'PAQUETE';
+                            break;
+                        case 'SERVICIO':
+                            sugerencia = 'PIEZA';
+                            break;
+                        default:
+                            sugerencia = 'UNIDAD';
+                    }
+                    
+                    if (sugerencia && !unidadSelect.value) {
+                        unidadSelect.value = sugerencia;
+                        
+                        // Mostrar notificación visual
+                        const notification = document.createElement('div');
+                        notification.className = 'alert alert-info alert-dismissible fade show mt-2';
+                        notification.innerHTML = `
+                            <i class="fas fa-info-circle me-2"></i>
+                            Unidad sugerida: <strong>${sugerencia}</strong> para tipo <strong>${tipo.replace('_', ' ')}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        unidadSelect.parentNode.appendChild(notification);
+                        
+                        // Auto-remover después de 3 segundos
+                        setTimeout(() => {
+                            if (notification.parentNode) {
+                                notification.remove();
+                            }
+                        }, 3000);
+                    }
+                });
+            }
+            
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>New Sale - NickelFox Sales System</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1">New Sale</h2>
+            <p class="text-muted mb-0">Create a new sales transaction</p>
+        </div>
+        <a th:href="@{/ventas}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Sales
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0">Sale Information</h5>
+        </div>
+        <div class="card-body">
+        
+        <form th:action="@{/ventas/guardar}" th:object="${venta}" method="post">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="fecha" class="form-label">Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" th:field="*{fecha}" id="fecha" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="cliente" class="form-label">Customer <span class="text-danger">*</span></label>
+                    <select class="form-control" th:field="*{cliente.id}" id="cliente" required>
+                        <option value="">Select a customer</option>
+                        <option th:each="cliente : ${clientes}"
+                                th:value="${cliente.id}"
+                                th:text="${cliente.nombre + ' ' + cliente.apellido}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="total" class="form-label">Total</label>
+                    <input type="text" class="form-control" th:field="*{total}" id="total" readonly>
+                </div>
+            </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <h5>Detalle de Venta</h5>
+                        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#productosModal">
+                            <i class="fas fa-plus"></i> Agregar Producto
+                        </button>
+
+                        <div class="table-responsive">
+                            <table id="detalleTable" class="table table-bordered no-datatable">
+                                <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Subtotal</th>
+                                    <th>Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <!-- Detalles se agregarán dinámicamente -->
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td id="totalVenta">$0.00</td>
+                                    <td></td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campos ocultos para los detalles -->
+                <div id="detallesHidden"></div>
+
+                <div class="row">
+                    <div class="col-md-12 text-end">
+                        <button type="submit" class="btn btn-success" onclick="return prepararDetalles()">
+                            <i class="fas fa-save"></i> Guardar Venta
+                        </button>
+                        <a th:href="@{/ventas}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para seleccionar productos -->
+    <div class="modal fade" id="productosModal" tabindex="-1" aria-labelledby="productosModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productosModalLabel">Seleccionar Productos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <input type="text" id="searchProduct" class="form-control" placeholder="Buscar producto...">
+                    </div>
+                    <div class="table-responsive">
+                        <table id="productosTable" class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Acción</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="producto : ${productos}">
+                                <td th:text="${producto.codigo}"></td>
+                                <td th:text="${producto.nombre}"></td>
+                                <td th:text="${'$' + #numbers.formatDecimal(producto.precio, 1, 2)}"></td>
+                                <td th:text="${producto.stock}"></td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-primary agregar-producto"
+                                            th:data-id="${producto.id}"
+                                            th:data-codigo="${producto.codigo}"
+                                            th:data-nombre="${producto.nombre}"
+                                            th:data-precio="${producto.precio}">
+                                        <i class="fas fa-plus"></i> Agregar
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts específicos para ventas -->
+<div layout:fragment="scripts">
+<script th:inline="javascript">
+    $(document).ready(function() {
+        debugger; // Para depuración, eliminar en producción
+        // Verificar que jQuery y Bootstrap estén disponibles
+        if (typeof $ === 'undefined') {
+            console.error('jQuery no está disponible');
+            return;
+        }
+        
+        if (typeof bootstrap === 'undefined') {
+            console.error('Bootstrap no está disponible');
+            return;
+        }
+
+        // Inicializar DataTable para productos (solo si está disponible)
+        if ($.fn.DataTable) {
+            try {
+                // Asegurar que la tabla de detalle no sea manejada por DataTable
+                $('#detalleTable').removeClass('table-custom').addClass('no-datatable');
+                
+                // Si la tabla de detalle fue inicializada como DataTable, destruirla
+                if ($.fn.DataTable.isDataTable('#detalleTable')) {
+                    $('#detalleTable').DataTable().destroy();
+                    $('#detalleTable').removeClass('table-custom').addClass('no-datatable');
+                }
+                
+                // Destruir tabla existente si ya está inicializada
+                if ($.fn.DataTable.isDataTable('#productosTable')) {
+                    $('#productosTable').DataTable().destroy();
+                }
+                
+                $('#productosTable').DataTable({
+                    language: {
+                        search: "Buscar:",
+                        lengthMenu: "Mostrar _MENU_ entradas",
+                        info: "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+                        infoEmpty: "No hay entradas para mostrar",
+                        infoFiltered: "(filtrado de _MAX_ entradas totales)",
+                        paginate: {
+                            first: "Primero",
+                            last: "Último",
+                            next: "Siguiente",
+                            previous: "Anterior"
+                        },
+                        zeroRecords: "No se encontraron registros coincidentes"
+                    },
+                    pageLength: 5,
+                    searching: true
+                });
+            } catch (e) {
+                console.warn('Error inicializando DataTable:', e);
+            }
+        }
+
+        // Simplificar búsqueda de productos - solo filtro local
+        $('#searchProduct').on('keyup', function() {
+            const term = $(this).val().toLowerCase();
+            $('#productosTable tbody tr').each(function() {
+                const text = $(this).text().toLowerCase();
+                $(this).toggle(text.indexOf(term) > -1);
+            });
+        });
+
+        // Agregar producto al detalle
+        $(document).on('click', '.agregar-producto', function() {
+            const id = $(this).data('id');
+            const codigo = $(this).data('codigo');
+            const nombre = $(this).data('nombre');
+            const precio = parseFloat($(this).data('precio')); // Convertir a número
+
+            // Verificar si el producto ya está en el detalle
+            if ($('#detalleTable tbody tr[data-id="' + id + '"]').length > 0) {
+                alert('Este producto ya está en el detalle');
+                return;
+            }
+
+            // Agregar fila al detalle
+            const row = `
+                <tr data-id="${id}">
+                    <td>${nombre} <small class="text-muted">(${codigo})</small></td>
+                    <td>
+                        <input type="number" class="form-control cantidad" value="1" min="1" style="width: 80px;">
+                    </td>
+                    <td class="precio-unitario">${formatMoney(precio)}</td>
+                    <td class="subtotal">${formatMoney(precio)}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger eliminar-producto">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+
+            $('#detalleTable tbody').append(row);
+            
+            // Limpiar cualquier mensaje de DataTable en la tabla de detalle
+            $('#detalleTable tbody .dataTables_empty').remove();
+            
+            calcularTotal();
+
+            // Cerrar modal
+            $('#productosModal').modal('hide');
+        });
+
+        // Eliminar producto del detalle
+        $(document).on('click', '.eliminar-producto', function() {
+            $(this).closest('tr').remove();
+            calcularTotal();
+        });
+
+        // Actualizar subtotal al cambiar cantidad
+        $(document).on('change', '.cantidad', function() {
+            const row = $(this).closest('tr');
+            const precioText = row.find('.precio-unitario').text().replace('$', '').replace(',', '');
+            const precio = parseFloat(precioText) || 0;
+            const cantidad = parseInt($(this).val()) || 1;
+            const subtotal = precio * cantidad;
+
+            row.find('.subtotal').text(formatMoney(subtotal));
+            calcularTotal();
+        });
+
+        // Formatear número como dinero
+        function formatMoney(amount) {
+            // Asegurarse de que amount es un número
+            const num = parseFloat(amount) || 0;
+            return '$' + num.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        // Calcular total de la venta
+        function calcularTotal() {
+            let total = 0;
+
+            $('#detalleTable tbody tr').each(function() {
+                const subtotalText = $(this).find('.subtotal').text().replace('$', '').replace(',', '');
+                const subtotal = parseFloat(subtotalText) || 0;
+                total += subtotal;
+            });
+
+            $('#totalVenta').text(formatMoney(total));
+            $('#total').val(total.toFixed(2));
+        }
+
+        // Preparar detalles para envío
+        function prepararDetalles() {
+            console.log('Preparando detalles...');
+            
+            // Validar que hay al menos un detalle
+            if ($('#detalleTable tbody tr').length === 0) {
+                alert('Debe agregar al menos un producto a la venta');
+                return false;
+            }
+
+            const detallesContainer = $('#detallesHidden');
+            detallesContainer.empty();
+
+            let index = 0;
+            $('#detalleTable tbody tr').each(function() {
+                const productoId = $(this).data('id');
+                const cantidad = $(this).find('.cantidad').val();
+                const precioText = $(this).find('.precio-unitario').text().replace('$', '').replace(',', '');
+                const precioUnitario = parseFloat(precioText) || 0;
+                const subtotalText = $(this).find('.subtotal').text().replace('$', '').replace(',', '');
+                const subtotal = parseFloat(subtotalText) || 0;
+
+                console.log(`Detalle ${index}: ProductoId=${productoId}, Cantidad=${cantidad}, Precio=${precioUnitario}, Subtotal=${subtotal}`);
+
+                // Crear campos ocultos para cada detalle
+                detallesContainer.append(`
+                    <input type="hidden" name="detalles[${index}].producto.id" value="${productoId}">
+                    <input type="hidden" name="detalles[${index}].cantidad" value="${cantidad}">
+                    <input type="hidden" name="detalles[${index}].precioUnitario" value="${precioUnitario}">
+                    <input type="hidden" name="detalles[${index}].subtotal" value="${subtotal}">
+                `);
+                index++;
+            });
+
+            console.log('Campos ocultos generados:', detallesContainer.html());
+            return true; // Permitir el envío del formulario
+        }
+
+        // Hacer la función prepararDetalles global
+        window.prepararDetalles = prepararDetalles;
+    });
+</script>
+</div>
+</body>
+</html>

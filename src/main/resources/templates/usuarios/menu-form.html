@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Menú - Sales System</title>
+</head>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1" th:text="${menu.id != null} ? 'Editar Menú' : 'Nuevo Menú'"></h2>
+            <p class="text-muted mb-0">Gestión de estructura de navegación</p>
+        </div>
+        <a th:href="@{/usuarios/web/menus}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Menús
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="card-title mb-0" th:text="${menu.id != null} ? 'Editar Menú' : 'Nuevo Menú'"></h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/usuarios/web/menus/guardar}" th:object="${menu}" method="post">
+                <!-- Campo oculto para ID en caso de edición -->
+                <input type="hidden" th:field="*{id}" th:if="${menu.id != null}"/>
+
+                <!-- Mensajes de error/éxito -->
+                <div th:if="${error}" class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                
+                <div th:if="${success}" class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre del Menú <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required>
+                        <div class="form-text">Nombre que aparecerá en la navegación</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="ruta" class="form-label">Ruta <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="ruta" th:field="*{ruta}" required>
+                        <div class="form-text">Ej: /productos, /ventas/list</div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="icono" class="form-label">Icono (FontAwesome)</label>
+                        <input type="text" class="form-control" id="icono" th:field="*{icono}">
+                        <div class="form-text">Ej: fas fa-box, fas fa-users</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="orden" class="form-label">Orden <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="orden" th:field="*{orden}" required min="1">
+                        <div class="form-text">Posición en el menú</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="esPadre" class="form-label">Tipo de Menú</label>
+                        <select class="form-select" id="esPadre" th:field="*{esPadre}">
+                            <option value="false">Menú Normal</option>
+                            <option value="true">Menú Padre (con submenús)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="menuPadre" class="form-label">Menú Padre</label>
+                        <select class="form-select" id="menuPadre" th:field="*{menuPadre}">
+                            <option value="">Sin menú padre (raíz)</option>
+                            <option th:each="padre : ${menusPadre}" 
+                                    th:value="${padre.id}" 
+                                    th:text="${padre.nombre}"
+                                    th:selected="${menu.menuPadre != null and menu.menuPadre.id == padre.id}"></option>
+                        </select>
+                        <div class="form-text">Selecciona si este menú es un submenú</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="activo" class="form-label">Estado</label>
+                        <select class="form-select" id="activo" th:field="*{activo}">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Vista previa del icono -->
+                <div class="mb-3">
+                    <label class="form-label">Vista Previa</label>
+                    <div class="card bg-light p-3">
+                        <div class="d-flex align-items-center">
+                            <i id="icon-preview" class="fas fa-sitemap me-2"></i>
+                            <span id="name-preview">Vista previa del menú</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-save me-2"></i>Guardar Menú
+                    </button>
+                    <a th:href="@{/usuarios/web/menus}" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="none">
+        $(document).ready(function() {
+            // Vista previa en tiempo real
+            function updatePreview() {
+                const nombre = $('#nombre').val() || 'Vista previa del menú';
+                const icono = $('#icono').val() || 'fas fa-sitemap';
+                
+                $('#name-preview').text(nombre);
+                $('#icon-preview')
+                    .removeClass()
+                    .addClass(icono + ' me-2');
+            }
+            
+            // Actualizar vista previa al escribir
+            $('#nombre, #icono').on('input', updatePreview);
+            
+            // Inicializar vista previa
+            updatePreview();
+        });
+    </script>
+</th:block>
+
+</html>

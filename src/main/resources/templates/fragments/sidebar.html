@@ -1,0 +1,43 @@
+<div th:fragment="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+    <div class="position-sticky pt-3">
+        <h4 class="text-white px-3 mb-4">Sales System</h4>
+        <ul class="nav flex-column">
+            <!-- Iterar sobre los menús dinámicos desde la base de datos -->
+            <li th:each="menu : ${menuItems}"
+                th:if="${menu.menuPadre == null}"
+                class="nav-item">
+
+                <a th:href="@{${menu.ruta}}" class="nav-link text-white"
+                   th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith(menu.ruta)} ? 'active' : ''">
+                    <i th:class="${menu.icono}" class="me-2"></i>
+                    <span th:text="${menu.nombre}"></span>
+                    <!-- Ícono de expansión si tiene submenús -->
+                    <i th:if="${not #lists.isEmpty(menu.subMenus)}" class="fas fa-angle-right ms-auto"></i>
+                </a>
+
+                <!-- Submenús si existen -->
+                <ul th:if="${not #lists.isEmpty(menu.subMenus)}" class="nav flex-column ms-3" 
+                    th:id="'submenu-' + ${menu.id}">
+                    <li th:each="subMenu : ${menu.subMenus}" class="nav-item">
+                        <a th:href="@{${subMenu.ruta}}" class="nav-link text-white-50"
+                           th:classappend="${#httpServletRequest != null and #httpServletRequest.requestURI.startsWith(subMenu.ruta)} ? 'active text-white' : ''">
+                            <i th:class="${subMenu.icono}" class="me-2"></i>
+                            <span th:text="${subMenu.nombre}"></span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Información del sistema -->
+            <li class="nav-item mt-4">
+                <div class="px-3">
+                    <small class="text-muted">Sistema de Gestión</small>
+                    <div class="progress mt-2" style="height: 4px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+                    </div>
+                    <small class="text-muted">Configuración Dinámica</small>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>

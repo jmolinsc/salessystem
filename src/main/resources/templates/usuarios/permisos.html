@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Gestión de Permisos - Sales System</title>
+</head>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1">Gestión de Permisos</h2>
+            <p class="text-muted mb-0">Administrar permisos del sistema</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/usuarios/web/roles}" class="btn btn-outline-secondary">
+                <i class="fas fa-user-shield me-2"></i>Roles
+            </a>
+            <a th:href="@{/usuarios/web/permisos/nuevo}" class="btn btn-primary-custom">
+                <i class="fas fa-plus me-2"></i>Nuevo Permiso
+            </a>
+        </div>
+    </div>
+
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h5 class="card-title">Permisos del Sistema</h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-filter me-1"></i>Filtrar
+                </button>
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-download me-1"></i>Exportar
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-custom" id="permisosTable" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Permiso</th>
+                        <th>Descripción</th>
+                        <th>Recurso</th>
+                        <th>Acción</th>
+                        <th>Roles Asignados</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="permiso : ${permisos}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-key text-white"></i>
+                                </div>
+                                <div>
+                                    <strong th:text="${permiso.nombre}"></strong>
+                                    <br>
+                                    <small class="text-muted">ID: <span th:text="${permiso.id}"></span></small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:text="${permiso.descripcion != null ? permiso.descripcion : 'Sin descripción'}"></span>
+                        </td>
+                        <td>
+                            <span class="badge-status badge-info" th:text="${permiso.recurso != null ? permiso.recurso : 'N/A'}"></span>
+                        </td>
+                        <td>
+                            <span class="badge-status badge-secondary" th:text="${permiso.accion != null ? permiso.accion : 'N/A'}"></span>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                <span th:each="rol : ${permiso.roles}" 
+                                      class="badge-status badge-success" 
+                                      th:text="${rol.nombre}"></span>
+                                <span th:if="${permiso.roles == null or #lists.isEmpty(permiso.roles)}"
+                                      class="badge-status badge-warning">Sin roles</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a th:href="@{/usuarios/web/permisos/editar/{id}(id=${permiso.id})}"
+                                   class="btn btn-outline-warning btn-sm" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a th:href="@{/usuarios/web/permisos/eliminar/{id}(id=${permiso.id})}"
+                                   class="btn btn-outline-danger btn-sm" title="Eliminar"
+                                   onclick="return confirm('¿Estás seguro de que deseas eliminar este permiso?');">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="none">
+        $(document).ready(function() {
+            // Verificar si la tabla ya está inicializada y destruirla si es necesario
+            if ($.fn.dataTable.isDataTable('#permisosTable')) {
+                $('#permisosTable').DataTable().destroy();
+            }
+            
+            // Inicializar DataTable con preset para permisos
+            initializeDataTableWithPreset('#permisosTable', 'dashboard', {
+                language: {
+                    search: 'Buscar permisos:',
+                    lengthMenu: 'Mostrar _MENU_ permisos por página',
+                    info: 'Mostrando _START_ a _END_ de _TOTAL_ permisos',
+                    infoEmpty: 'No hay permisos para mostrar',
+                    infoFiltered: '(filtrado de _MAX_ permisos totales)',
+                    zeroRecords: 'No se encontraron permisos que coincidan con la búsqueda',
+                    emptyTable: 'No hay permisos registrados en el sistema'
+                }
+            });
+        });
+    </script>
+</th:block>
+
+</html>
