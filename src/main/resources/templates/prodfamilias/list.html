@@ -1,171 +1,93 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      layout:decorate="~{layout}"
-      th:with="title='Familias de Productos'">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
 <head>
     <title>Familias de Productos</title>
 </head>
 <body>
 <div layout:fragment="content">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>
-            <i class="fas fa-sitemap text-primary"></i>
-            Familias de Productos
-        </h2>
-        <a th:href="@{/prodfamilias/nueva}" class="btn btn-primary">
-            <i class="fas fa-plus"></i>
-            Nueva Familia
+        <div>
+            <h2 class="h3 mb-1">Familias de Productos</h2>
+            <p class="text-muted mb-0">Administra las familias de productos</p>
+        </div>
+        <a th:href="@{/prodfamilias/nueva}" class="btn btn-primary-custom">
+            <i class="fas fa-plus me-2"></i>Nueva Familia
         </a>
     </div>
-
-    <!-- Mensajes de alerta -->
-    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
-        <span th:text="${success}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-circle me-2"></i>
-        <span th:text="${error}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
-    <!-- Tabla de familias -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover" id="prodFamiliasTable">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Código</th>
-                            <th>Nombre</th>
-                            <th>Descripción</th>
-                            <th>Estatus</th>
-                            <th>Fecha Alta</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="prodFamilia : ${prodFamilias}" th:id="'familia-' + ${prodFamilia.id}">
-                            <td th:text="${prodFamilia.id}"></td>
-                            <td>
-                                <span class="badge bg-secondary" th:text="${prodFamilia.codigo}"></span>
-                            </td>
-                            <td>
-                                <strong th:text="${prodFamilia.nombre}"></strong>
-                            </td>
-                            <td th:text="${prodFamilia.descripcion ?: 'Sin descripción'}"></td>
-                            <td>
-                                <span class="badge" 
-                                      th:classappend="${prodFamilia.estatus == 'ACTIVO'} ? 'bg-success' : 'bg-danger'"
-                                      th:text="${prodFamilia.estatus}">
-                                </span>
-                            </td>
-                            <td th:text="${#temporals.format(prodFamilia.fechaAlta, 'dd/MM/yyyy HH:mm')}"></td>
-                            <td class="text-center">
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <!-- Botón Editar -->
-                                    <a th:href="@{/prodfamilias/editar/{id}(id=${prodFamilia.id})}" 
-                                       class="btn btn-outline-primary" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    
-                                    <!-- Botón Activar/Desactivar -->
-                                    <button th:if="${prodFamilia.estatus == 'ACTIVO'}"
-                                            class="btn btn-outline-warning"
-                                            title="Desactivar"
-                                            th:onclick="'confirmarDesactivar(' + ${prodFamilia.id} + ', \'' + ${prodFamilia.nombre} + '\')'">
-                                        <i class="fas fa-toggle-off"></i>
-                                    </button>
-                                    
-                                    <button th:if="${prodFamilia.estatus == 'INACTIVO'}"
-                                            class="btn btn-outline-success"
-                                            title="Activar"
-                                            th:onclick="'confirmarActivar(' + ${prodFamilia.id} + ', \'' + ${prodFamilia.nombre} + '\')'">
-                                        <i class="fas fa-toggle-on"></i>
-                                    </button>
-                                    
-                                    <!-- Botón Eliminar -->
-                                    <button class="btn btn-outline-danger" 
-                                            title="Eliminar"
-                                            th:onclick="'confirmarEliminar(' + ${prodFamilia.id} + ', \'' + ${prodFamilia.nombre} + '\')'">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                    <tfoot th:if="${#lists.isEmpty(prodFamilias)}">
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
-                                <i class="fas fa-inbox fa-2x mb-2"></i>
-                                <p>No hay familias de productos registradas</p>
-                                <a th:href="@{/prodfamilias/nueva}" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i> Crear Primera Familia
-                                </a>
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
+    <div class="card-custom">
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Lista de Familias</h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-filter me-1"></i>Filtrar
+                </button>
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-download me-1"></i>Exportar
+                </button>
             </div>
         </div>
+        <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm table-custom" id="familiasTable" style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="compact-cell">Nombre</th>
+                        <th class="compact-cell">Código</th>
+                        <th class="compact-cell">Descripción</th>
+                        <th class="compact-cell">Estatus</th>
+                        <th class="compact-cell">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="familia : ${prodFamilias}">
+                        <td class="compact-cell">
+                            <div class="fw-bold small" th:text="${familia.nombre}"></div>
+                            <small class="text-muted d-block" style="font-size: 0.6rem; line-height: 1;">ID: #<span th:text="${familia.id}"></span></small>
+                        </td>
+                        <td class="compact-cell" th:text="${familia.codigo}"></td>
+                        <td class="compact-cell" th:text="${familia.descripcion}"></td>
+                        <td class="compact-cell">
+                            <span th:if="${familia.estatus == 'ACTIVO'}" class="badge badge-success small">Act.</span>
+                            <span th:if="${familia.estatus == 'INACTIVO'}" class="badge badge-secondary small">Inact.</span>
+                        </td>
+                        <td class="compact-cell">
+                            <div class="btn-group" role="group">
+                                <a th:href="@{/prodfamilias/editar/{id}(id=${familia.id})}"
+                                   class="btn btn-outline-warning btn-sm py-1 px-2" title="Editar" style="font-size: 0.7rem;">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a th:href="@{/prodfamilias/eliminar/{id}(id=${familia.id})}"
+                                   class="btn btn-outline-danger btn-sm py-1 px-2" title="Eliminar" style="font-size: 0.7rem;"
+                                   onclick="return confirm('¿Seguro que deseas eliminar esta familia?');">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+        </div>
     </div>
-
-    <!-- Formularios ocultos para acciones -->
-    <form id="desactivarForm" method="post" style="display: none;">
-        <input type="hidden" name="_method" value="post">
-    </form>
-
-    <form id="activarForm" method="post" style="display: none;">
-        <input type="hidden" name="_method" value="post">
-    </form>
-
-    <form id="eliminarForm" method="get" style="display: none;">
-    </form>
 </div>
-
-<div layout:fragment="scripts">
-    <script>
+<th:block layout:fragment="scripts">
+    <script th:inline="none">
         $(document).ready(function() {
-            // Inicializar DataTable
-            $('#prodFamiliasTable').DataTable({
-                responsive: true,
+            // Inicializar DataTable con preset para familias y modo oscuro
+            initializeDataTableWithPreset('#familiasTable', 'familias', {
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
-                },
-                order: [[1, 'asc']], // Ordenar por código
-                columnDefs: [
-                    { targets: [-1], orderable: false } // Deshabilitar ordenamiento en acciones
-                ]
+                    search: 'Buscar familias:',
+                    lengthMenu: 'Mostrar _MENU_ familias por página',
+                    info: 'Mostrando _START_ a _END_ de _TOTAL_ familias',
+                    infoEmpty: 'No hay familias para mostrar',
+                    infoFiltered: '(filtrado de _MAX_ familias totales)',
+                    zeroRecords: 'No se encontraron familias que coincidan con la búsqueda',
+                    emptyTable: 'No hay familias registradas en el sistema'
+                }
             });
         });
-
-        function confirmarDesactivar(id, nombre) {
-            if (confirm('¿Está seguro de desactivar la familia "' + nombre + '"?')) {
-                const form = document.getElementById('desactivarForm');
-                form.action = '/prodfamilias/desactivar/' + id;
-                form.submit();
-            }
-        }
-
-        function confirmarActivar(id, nombre) {
-            if (confirm('¿Está seguro de activar la familia "' + nombre + '"?')) {
-                const form = document.getElementById('activarForm');
-                form.action = '/prodfamilias/activar/' + id;
-                form.submit();
-            }
-        }
-
-        function confirmarEliminar(id, nombre) {
-            if (confirm('¿Está seguro de eliminar la familia "' + nombre + '"?\n\nEsta acción no se puede deshacer.')) {
-                const form = document.getElementById('eliminarForm');
-                form.action = '/prodfamilias/eliminar/' + id;
-                form.submit();
-            }
-        }
     </script>
+</th:block>
 </div>
 </body>
 </html>

@@ -44,49 +44,35 @@
                         <th class="compact-cell">Precio</th>
                         <th class="compact-cell">Stock</th>
                         <th class="compact-cell">Estatus</th>
+                        <th class="compact-cell">Imagen</th>
                         <th class="compact-cell">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="producto : ${productos}">
                         <td class="compact-cell">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-warning rounded-2 d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
-                                    <i class="fas fa-box text-white small"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-bold small" th:text="${producto.nombre}"></div>
-                                    <small class="text-muted d-block" th:text="${producto.descripcion}" style="font-size: 0.7rem; line-height: 1;"></small>
-                                </div>
-                            </div>
+                            <div class="fw-bold small" th:text="${producto.nombre}"></div>
+                            <small class="text-muted d-block" th:text="${producto.descripcion}" style="font-size: 0.7rem; line-height: 1;"></small>
                         </td>
-                        <td class="compact-cell">
-                            <span class="badge badge-primary small" th:text="${producto.codigo}"></span>
-                        </td>
-                        <td class="compact-cell">
-                            <span class="small" th:text="${producto.fabricante != null ? producto.fabricante.nombre : 'N/A'}"></span>
-                        </td>
-                        <td class="compact-cell">
-                            <span class="badge badge-info small" th:text="${producto.unidad != null ? producto.unidad : 'UNIDAD'}"></span>
-                        </td>
-                        <td class="compact-cell">
-                            <span class="fw-bold small" th:text="${'$' + #numbers.formatDecimal(producto.precio, 1, 2)}"></span>
-                        </td>
-                        <td class="compact-cell">
-                            <div class="d-flex align-items-center">
-                                <span th:text="${producto.stock}" class="me-1 small fw-bold"></span>
-                                <span th:if="${producto.stock > 20}" class="badge badge-success small">OK</span>
-                                <span th:if="${producto.stock <= 20 and producto.stock > 5}" class="badge badge-warning small">Bajo</span>
-                                <span th:if="${producto.stock <= 5}" class="badge badge-danger small">Sin</span>
-                            </div>
-                        </td>
+                        <td class="compact-cell" th:text="${producto.codigo}"></td>
+                        <td class="compact-cell" th:text="${producto.fabricante != null ? producto.fabricante.nombre : 'N/A'}"></td>
+                        <td class="compact-cell" th:text="${producto.unidad}"></td>
+                        <td class="compact-cell" th:text="${#numbers.formatDecimal(producto.precio, 1, 'POINT', 2, 'POINT')}"></td>
+                        <td class="compact-cell" th:text="${producto.stock}"></td>
                         <td class="compact-cell">
                             <span th:if="${producto.estatus == 'ACTIVO'}" class="badge badge-success small">Activo</span>
                             <span th:if="${producto.estatus == 'INACTIVO'}" class="badge badge-secondary small">Inactivo</span>
                             <span th:if="${producto.estatus == 'DESCONTINUADO'}" class="badge badge-warning small">Descontinuado</span>
                             <span th:if="${producto.estatus == 'AGOTADO'}" class="badge badge-danger small">Agotado</span>
                             <span th:if="${producto.estatus == 'EN_REVISION'}" class="badge badge-info small">En Revisión</span>
-                            <span th:if="${producto.estatus == null}" class="badge badge-success small">Activo</span>
+                        </td>
+                        <td class="compact-cell">
+                            <div th:if="${producto.imagenUrl}" class="d-flex justify-content-center">
+                                <img th:src="@{${producto.imagenUrl}}" alt="Imagen" class="img-thumbnail" style="max-width: 60px; max-height: 60px;">
+                            </div>
+                            <div th:if="${producto.imagenUrl == null}" class="d-flex justify-content-center">
+                                <img src="/static/images/producto-default.svg" alt="Sin imagen" class="img-thumbnail" style="max-width: 40px; max-height: 40px;">
+                            </div>
                         </td>
                         <td class="compact-cell">
                             <div class="btn-group" role="group">
@@ -96,7 +82,7 @@
                                 </a>
                                 <a th:href="@{/productos/eliminar/{id}(id=${producto.id})}"
                                    class="btn btn-outline-danger btn-sm py-1 px-2" title="Delete" style="font-size: 0.7rem;"
-                                   onclick="return confirm('Are you sure you want to delete this product?');">
+                                   onclick="return confirm('¿Está seguro de que desea eliminar este producto?');">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </div>
@@ -107,26 +93,35 @@
     </div>
 </div>
 
+    <!-- Mensaje Toast -->
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+            <div id="mainToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true"
+                 th:classappend="${toastType == 'error' ? 'text-bg-danger' : toastType == 'info' ? 'text-bg-info' : toastType == 'warning' ? 'text-bg-warning' : 'text-bg-success'}"
+                 th:if="${toastMessage != null}">
+                <div class="d-flex">
+                    <div class="toast-body" th:text="${toastMessage}">Operación exitosa</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <th:block layout:fragment="scripts">
-    <script th:inline="none">
-        $(document).ready(function() {
-            // Inicializar DataTable con preset para productos y modo oscuro
-            initializeDataTableWithPreset('#productosTable', 'productos', {
-                language: {
-                    search: 'Buscar productos:',
-                    lengthMenu: 'Mostrar _MENU_ productos por página',
-                    info: 'Mostrando _START_ a _END_ de _TOTAL_ productos',
-                    infoEmpty: 'No hay productos para mostrar',
-                    infoFiltered: '(filtrado de _MAX_ productos totales)',
-                    zeroRecords: 'No se encontraron productos que coincidan con la búsqueda',
-                    emptyTable: 'No hay productos registrados en el sistema'
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            var toastMessage = /*[[${toastMessage}]]*/ null;
+            var toastType = /*[[${toastType}]]*/ 'success';
+            if (toastMessage) {
+                var toastEl = document.getElementById('mainToast');
+                if (toastEl) {
+                    var toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+                    toast.show();
                 }
-            });
+            }
         });
     </script>
 </th:block>
 </div>
 </body>
-</html>
-
 </html>

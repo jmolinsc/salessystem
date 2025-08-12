@@ -42,6 +42,9 @@ public class Producto {
     @JoinColumn(name = "prod_familia_id")
     private ProdFamilia prodFamilia;
     
+    @Column(length = 255)
+    private String imagenUrl;
+
     // Constructores
     public Producto() {
         this.fechaAlta = LocalDateTime.now();
@@ -150,6 +153,14 @@ public class Producto {
 
     public void setProdFamilia(ProdFamilia prodFamilia) {
         this.prodFamilia = prodFamilia;
+    }
+
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
     }
 
     // Getters, setters, constructores

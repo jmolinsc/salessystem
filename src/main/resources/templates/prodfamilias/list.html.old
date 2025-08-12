@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Familias de Productos</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Familias de Productos</h1>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-table me-1"></i>
+                            Lista de Familias
+                        </div>
+                        <a th:href="@{/prodfamilias/nueva}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>Nueva Familia
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="familiasTable">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Código</th>
+                                    <th>Descripción</th>
+                                    <th>Estatus</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="familia : ${prodFamilias}">
+                                    <td th:text="${familia.nombre}">Nombre</td>
+                                    <td th:text="${familia.codigo}">Código</td>
+                                    <td th:text="${familia.descripcion}">Descripción</td>
+                                    <td>
+                                        <span th:if="${familia.estatus == 'ACTIVO'}" class="badge bg-success">Activo</span>
+                                        <span th:if="${familia.estatus == 'INACTIVO'}" class="badge bg-secondary">Inactivo</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a th:href="@{/prodfamilias/editar/{id}(id=${familia.id})}"
+                                               class="btn btn-warning btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button th:if="${familia.estatus == 'ACTIVO'}"
+                                                    class="btn btn-secondary btn-sm"
+                                                    th:data-id="${familia.id}"
+                                                    onclick="toggleEstatus(this.getAttribute('data-id'), 'INACTIVO')">
+                                                <i class="fas fa-toggle-off"></i>
+                                            </button>
+                                            <button th:if="${familia.estatus == 'INACTIVO'}"
+                                                    class="btn btn-success btn-sm"
+                                                    th:data-id="${familia.id}"
+                                                    onclick="toggleEstatus(this.getAttribute('data-id'), 'ACTIVO')">
+                                                <i class="fas fa-toggle-on"></i>
+                                            </button>
+                                            <a th:href="@{/prodfamilias/eliminar/{id}(id=${familia.id})}"
+                                               class="btn btn-danger btn-sm"
+                                               onclick="return confirm('¿Está seguro de eliminar esta familia?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            $(document).ready(function() {
+                $('#familiasTable').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                    }
+                });
+            });
+
+            function toggleEstatus(id, nuevoEstatus) {
+                if (confirm('¿Está seguro de cambiar el estatus de esta familia?')) {
+                    const url = `/prodfamilias/toggle/${id}?estatus=${nuevoEstatus}`;
+                    fetch(url, { method: 'POST' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                location.reload();
+                            } else {
+                                alert('Error al cambiar el estatus');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error al cambiar el estatus');
+                        });
+                }
+            }
+        </script>
+    </th:block>
+</body>
+</html>

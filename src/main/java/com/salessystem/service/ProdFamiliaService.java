@@ -71,4 +71,8 @@ public class ProdFamiliaService {
         }
         throw new IllegalArgumentException("Familia de producto no encontrada: " + id);
     }
+
+    public List<ProdFamilia> findByNombre(String nombre) {
+        return prodFamiliaRepository.findByNombre(nombre);
+    }
 }

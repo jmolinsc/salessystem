@@ -45,6 +45,9 @@ public class DataInitializer implements CommandLineRunner {
     private ComportamientoService comportamientoService;
     
     @Autowired
+    private ProdFamiliaService prodFamiliaService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -82,7 +85,10 @@ public class DataInitializer implements CommandLineRunner {
         // Inicializar productos de ejemplo
         initializeDefaultProductos();
         
-        System.out.println("✅ Menús, permisos, roles, usuario admin, fabricantes, comportamientos, tipos de documento, categorías, clientes y productos inicializados correctamente en la base de datos");
+        // Inicializar familias de productos de ejemplo
+        initializeDefaultProdFamilias();
+
+        System.out.println("✅ Menús, permisos, roles, usuario admin, fabricantes, comportamientos, tipos de documento, categorías, clientes, productos y familias de productos inicializados correctamente en la base de datos");
     }
     
     private void initializeMenus() {
@@ -448,6 +454,30 @@ public class DataInitializer implements CommandLineRunner {
             comportamiento.setEstatus("ACTIVO");
             
             comportamientoService.save(comportamiento);
+        }
+    }
+
+    private void initializeDefaultProdFamilias() {
+        List<ProdFamilia> familiasExistentes = prodFamiliaService.findAll();
+        if (familiasExistentes.isEmpty()) {
+            createProdFamiliaIfNotExists("Electrodomésticos", "Familia de electrodomésticos", "FAM-EDO");
+            createProdFamiliaIfNotExists("Tecnología", "Familia de productos tecnológicos", "FAM-TEC");
+            createProdFamiliaIfNotExists("Hogar", "Productos para el hogar", "FAM-HOG");
+            createProdFamiliaIfNotExists("Oficina", "Productos para oficina", "FAM-OFI");
+            createProdFamiliaIfNotExists("Gaming", "Consolas y accesorios de videojuegos", "FAM-GAM");
+            createProdFamiliaIfNotExists("Audio", "Equipos de audio y sonido", "FAM-AUD");
+            createProdFamiliaIfNotExists("Video", "Equipos de video y entretenimiento", "FAM-VID");
+            System.out.println("✅ Familias de productos de ejemplo creadas exitosamente");
+        } else {
+            System.out.println("🔍 Ya existen " + familiasExistentes.size() + " familias de productos en la base de datos");
+        }
+    }
+
+    private void createProdFamiliaIfNotExists(String nombre, String descripcion, String codigo) {
+        List<ProdFamilia> existentes = prodFamiliaService.findByNombre(nombre);
+        if (existentes == null || existentes.isEmpty()) {
+            ProdFamilia familia = new ProdFamilia(nombre, descripcion, codigo);
+            prodFamiliaService.save(familia);
         }
     }
 }

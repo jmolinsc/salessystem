@@ -24,4 +24,6 @@ public interface ProdFamiliaRepository extends JpaRepository<ProdFamilia, Long> 
     
     @Query("SELECT COUNT(p) FROM ProdFamilia p WHERE p.estatus = 'ACTIVO'")
     long countActivas();
+
+    List<ProdFamilia> findByNombre(String nombre);
 }

@@ -1,149 +1,165 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      layout:decorate="~{layout}"
-      th:with="title=${esEdicion ? 'Editar Familia' : 'Nueva Familia'}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout-nickelfox}">
+
 <head>
     <title th:text="${esEdicion ? 'Editar Familia de Producto' : 'Nueva Familia de Producto'}">Familia de Producto</title>
 </head>
+
 <body>
 <div layout:fragment="content">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-sitemap me-2"></i>
-                        <span th:text="${esEdicion ? 'Editar Familia de Producto' : 'Nueva Familia de Producto'}">Familia de Producto</span>
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <!-- Mensajes de error -->
-                    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
-                        <ul class="mb-0">
-                            <li th:each="error : ${#fields.globalErrors()}" th:text="${error}"></li>
-                        </ul>
-                    </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1" th:text="${esEdicion ? 'Editar Familia de Producto' : 'Nueva Familia de Producto'}">Familia de Producto</h2>
+            <p class="text-muted mb-0">Gestiona la información de la familia de productos</p>
+        </div>
+        <a th:href="@{/prodfamilias}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver a Familias
+        </a>
+    </div>
 
-                    <form th:object="${prodFamilia}" 
-                          th:action="${esEdicion ? '/prodfamilias/actualizar' : '/prodfamilias/guardar'}" 
-                          method="post" 
-                          novalidate>
-                        
-                        <!-- Campo oculto para ID en edición -->
-                        <input type="hidden" th:field="*{id}" th:if="${esEdicion}">
-                        <input type="hidden" th:field="*{fechaAlta}" th:if="${esEdicion}">
-                        <input type="hidden" th:field="*{estatus}" th:if="${esEdicion}">
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h5 class="card-title" th:text="${esEdicion ? 'Editar Información de Familia' : 'Información de Familia'}">Información de Familia</h5>
+        </div>
+        <div class="card-body">
+            <!-- Mensajes de error -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
 
-                        <div class="row">
-                            <!-- Código -->
-                            <div class="col-md-4 mb-3">
-                                <label for="codigo" class="form-label">Código</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       th:field="*{codigo}"
-                                       th:classappend="${#fields.hasErrors('codigo')} ? 'is-invalid' : ''"
-                                       id="codigo" 
-                                       maxlength="20"
-                                       placeholder="Ej: FAM001">
-                                <div th:if="${#fields.hasErrors('codigo')}" class="invalid-feedback">
-                                    <span th:errors="*{codigo}"></span>
+                        <form th:object="${prodFamilia}" id="familiaForm"
+                            th:action="@{${esEdicion ? '/prodfamilias/actualizar' : '/prodfamilias/guardar'}}"
+                            method="post" class="row g-3">
+                            
+                            <!-- Mensajes de error globales -->
+                            <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger mb-3">
+                                <ul class="mb-0">
+                                    <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                                </ul>
+                            </div>
+
+                            <!-- Campo oculto para ID en edición -->
+                            <input type="hidden" th:field="*{id}" th:if="${esEdicion}">
+                            <input type="hidden" th:field="*{fechaAlta}" th:if="${esEdicion}">
+                            <input type="hidden" th:field="*{estatus}" th:if="${esEdicion}">
+
+                            <div class="col-md-4">
+                                <label for="codigo" class="form-label">Código *</label>
+                                <input type="text" class="form-control" th:field="*{codigo}"
+                                    th:classappend="${#fields.hasErrors('codigo')} ? 'is-invalid' : ''" id="codigo"
+                                    maxlength="20" placeholder="Ej: FAM001" required>
+                                <div class="invalid-feedback" id="codigoError">
+                                    <span th:if="${#fields.hasErrors('codigo')}" th:errors="*{codigo}">
+                                        El código es requerido
+                                    </span>
+                                </div>
+                                <div class="valid-feedback" id="codigoSuccess" style="display: none;">
+                                    Código disponible
                                 </div>
                             </div>
 
-                            <!-- Nombre -->
-                            <div class="col-md-8 mb-3">
+                            <div class="col-md-8">
                                 <label for="nombre" class="form-label">Nombre *</label>
-                                <input type="text" 
-                                       class="form-control" 
-                                       th:field="*{nombre}"
-                                       th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid' : ''"
-                                       id="nombre" 
-                                       required
-                                       maxlength="100"
-                                       placeholder="Nombre de la familia">
-                                <div th:if="${#fields.hasErrors('nombre')}" class="invalid-feedback">
-                                    <span th:errors="*{nombre}"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Descripción -->
-                        <div class="mb-3">
-                            <label for="descripcion" class="form-label">Descripción</label>
-                            <textarea class="form-control" 
-                                      th:field="*{descripcion}"
-                                      th:classappend="${#fields.hasErrors('descripcion')} ? 'is-invalid' : ''"
-                                      id="descripcion" 
-                                      rows="3" 
-                                      maxlength="255"
-                                      placeholder="Descripción de la familia de productos"></textarea>
-                            <div th:if="${#fields.hasErrors('descripcion')}" class="invalid-feedback">
-                                <span th:errors="*{descripcion}"></span>
-                            </div>
-                        </div>
-
-                        <!-- Información adicional solo en edición -->
-                        <div th:if="${esEdicion}" class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Estatus Actual</label>
-                                <div>
-                                    <span class="badge fs-6" 
-                                          th:classappend="*{estatus == 'ACTIVO'} ? 'bg-success' : 'bg-danger'"
-                                          th:text="*{estatus}">
+                                <input type="text" class="form-control" th:field="*{nombre}"
+                                    th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid' : ''" id="nombre"
+                                    required maxlength="100" placeholder="Nombre de la familia">
+                                <div class="invalid-feedback">
+                                    <span th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}">
+                                        El nombre es requerido
                                     </span>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Fecha de Alta</label>
-                                <div class="form-control-plaintext" th:text="${#temporals.format(prodFamilia.fechaAlta, 'dd/MM/yyyy HH:mm')}">
+
+                            <div class="col-12">
+                                <label for="descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" th:field="*{descripcion}"
+                                    th:classappend="${#fields.hasErrors('descripcion')} ? 'is-invalid' : ''"
+                                    id="descripcion" rows="3" maxlength="255"
+                                    placeholder="Descripción detallada de la familia de productos"></textarea>
+                                <div class="invalid-feedback">
+                                    <span th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}">
+                                        La descripción no puede exceder los 255 caracteres
+                                    </span>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Botones -->
-                        <div class="d-flex justify-content-between">
-                            <a th:href="@{/prodfamilias}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i>
-                                Volver al Listado
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i th:class="${esEdicion ? 'fas fa-save' : 'fas fa-plus'}"></i>
-                                <span th:text="${esEdicion ? 'Actualizar Familia' : 'Guardar Familia'}">Guardar</span>
-                            </button>
-                        </div>
-                    </form>
+                            <!-- Información adicional solo en edición -->
+                            <div th:if="${esEdicion}" class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Estatus Actual</label>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge badge-lg me-2" 
+                                            th:classappend="${prodFamilia.estatus == 'ACTIVO'} ? 'badge-success' : 'badge-danger'"
+                                            th:text="${prodFamilia.estatus}">
+                                        </span>
+                                        <small class="text-muted" th:if="${prodFamilia.estatus == 'INACTIVO'}">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Esta familia está inactiva
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Fecha de Alta</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </span>
+                                        <div class="form-control-plaintext px-2"
+                                            th:text="${#temporals.format(prodFamilia.fechaAlta, 'dd/MM/yyyy HH:mm')}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="d-flex justify-content-between">
+                                <a th:href="@{/prodfamilias}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Volver al Listado
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i th:class="${esEdicion ? 'fas fa-save' : 'fas fa-plus'}"></i>
+                                    <span
+                                        th:text="${esEdicion ? 'Actualizar Familia' : 'Guardar Familia'}">Guardar</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div layout:fragment="scripts">
-    <script>
-        $(document).ready(function() {
-            // Auto-generar código basado en el nombre si está vacío
-            $('#nombre').on('input', function() {
-                const codigo = $('#codigo');
-                if (!codigo.val()) {
-                    let nombre = $(this).val().toUpperCase();
-                    let codigoGenerado = nombre.substring(0, 6).replace(/[^A-Z0-9]/g, '');
-                    if (codigoGenerado.length > 0) {
-                        codigo.val(codigoGenerado);
+    <div layout:fragment="scripts">
+        <script>
+            $(document).ready(function () {
+                // Auto-generar código basado en el nombre si está vacío
+                $('#nombre').on('input', function () {
+                    const codigo = $('#codigo');
+                    if (!codigo.val()) {
+                        let nombre = $(this).val().toUpperCase();
+                        let codigoGenerado = nombre.substring(0, 6).replace(/[^A-Z0-9]/g, '');
+                        if (codigoGenerado.length > 0) {
+                            codigo.val(codigoGenerado);
+                        }
                     }
-                }
-            });
+                });
 
-            // Validation feedback
-            $('form').on('submit', function(e) {
-                const form = this;
-                if (!form.checkValidity()) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-                $(form).addClass('was-validated');
+                // Validation feedback
+                $('form').on('submit', function (e) {
+                    const form = this;
+                    if (!form.checkValidity()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    $(form).addClass('was-validated');
+                });
             });
-        });
-    </script>
-</div>
+        </script>
+    </div>
 </body>
+
 </html>

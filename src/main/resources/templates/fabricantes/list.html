@@ -103,7 +103,7 @@
                                     </a>
                                     <button type="button" class="btn btn-outline-info btn-sm py-1 px-2" 
                                             title="Change Status" style="font-size: 0.7rem;"
-                                            th:onclick="'cambiarEstatus(' + ${fabricante.id} + ', \'' + ${fabricante.estatus} + '\')'">
+                                            th:attr="onclick='cambiarEstatus(' + ${fabricante.id} + ', \'' + ${fabricante.estatus} + '\')'">
                                         <i class="fas fa-exchange-alt"></i>
                                     </button>
                                 </div>

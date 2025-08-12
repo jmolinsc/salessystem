@@ -23,6 +23,13 @@ public class FabricanteController {
     private FabricanteService fabricanteService;
 
     // Listar fabricantes
+    @GetMapping("/list")
+    public String listfabricantes(Model model) {
+        List<Fabricante> fabricantes = fabricanteService.findAll();
+        model.addAttribute("fabricantes", fabricantes);
+        return "fabricantes/list";
+    }
+
     @GetMapping
     public String index(Model model) {
         List<Fabricante> fabricantes = fabricanteService.findAll();
@@ -54,17 +61,16 @@ public class FabricanteController {
 
     // Guardar fabricante
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute Fabricante fabricante, 
-                         BindingResult bindingResult, 
-                         Model model, 
-                         RedirectAttributes redirectAttributes) {
-        
+    public String guardar(@ModelAttribute Fabricante fabricante,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
         // Validar nombre único
         boolean isNew = fabricante.getId() == null;
-        boolean nombreExists = isNew ? 
-            fabricanteService.existsByNombre(fabricante.getNombre()) :
-            fabricanteService.existsByNombreAndIdNot(fabricante.getNombre(), fabricante.getId());
-            
+        boolean nombreExists = isNew ? fabricanteService.existsByNombre(fabricante.getNombre())
+                : fabricanteService.existsByNombreAndIdNot(fabricante.getNombre(), fabricante.getId());
+
         if (nombreExists) {
             bindingResult.rejectValue("nombre", "error.fabricante", "Ya existe un fabricante con este nombre.");
         }
@@ -95,19 +101,19 @@ public class FabricanteController {
             Optional<Fabricante> fabricanteOpt = fabricanteService.findById(id);
             if (fabricanteOpt.isPresent()) {
                 Fabricante fabricante = fabricanteOpt.get();
-                
+
                 // Verificar si puede ser eliminado
                 if (!fabricanteService.canDelete(id)) {
                     long productCount = fabricanteService.countProductosByFabricante(id);
-                    redirectAttributes.addFlashAttribute("error", 
-                        "No se puede eliminar el fabricante '" + fabricante.getNombre() + 
-                        "' porque tiene " + productCount + " producto(s) asociado(s).");
+                    redirectAttributes.addFlashAttribute("error",
+                            "No se puede eliminar el fabricante '" + fabricante.getNombre() +
+                                    "' porque tiene " + productCount + " producto(s) asociado(s).");
                     return "redirect:/fabricantes";
                 }
-                
+
                 fabricanteService.deleteById(id);
-                redirectAttributes.addFlashAttribute("success", 
-                    "Fabricante '" + fabricante.getNombre() + "' eliminado exitosamente.");
+                redirectAttributes.addFlashAttribute("success",
+                        "Fabricante '" + fabricante.getNombre() + "' eliminado exitosamente.");
             } else {
                 redirectAttributes.addFlashAttribute("error", "Fabricante no encontrado.");
             }
@@ -120,8 +126,8 @@ public class FabricanteController {
     // Cambiar estatus del fabricante
     @PostMapping("/cambiar-estatus/{id}")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> cambiarEstatus(@PathVariable Long id, 
-                                                             @RequestParam String estatus) {
+    public ResponseEntity<Map<String, Object>> cambiarEstatus(@PathVariable Long id,
+            @RequestParam String estatus) {
         Map<String, Object> response = new HashMap<>();
         try {
             Fabricante fabricante = fabricanteService.cambiarEstatus(id, estatus);
@@ -138,12 +144,11 @@ public class FabricanteController {
     // Validar nombre único (AJAX)
     @GetMapping("/validar-nombre")
     @ResponseBody
-    public ResponseEntity<Map<String, Boolean>> validarNombre(@RequestParam String nombre, 
-                                                             @RequestParam(required = false) Long id) {
+    public ResponseEntity<Map<String, Boolean>> validarNombre(@RequestParam String nombre,
+            @RequestParam(required = false) Long id) {
         Map<String, Boolean> response = new HashMap<>();
-        boolean existe = (id == null) ? 
-            fabricanteService.existsByNombre(nombre) :
-            fabricanteService.existsByNombreAndIdNot(nombre, id);
+        boolean existe = (id == null) ? fabricanteService.existsByNombre(nombre)
+                : fabricanteService.existsByNombreAndIdNot(nombre, id);
         response.put("existe", existe);
         return ResponseEntity.ok(response);
     }
