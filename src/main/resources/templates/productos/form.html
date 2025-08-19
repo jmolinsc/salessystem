@@ -19,6 +19,42 @@
         </a>
     </div>
 
+    <!-- Barra de botones mejorada y alineada a la izquierda -->
+    <div class="d-flex align-items-center gap-2 mb-4" style="justify-content: flex-start;">
+
+        <button type="button" class="btn btn-outline-primary btn-icon rounded-circle shadow-sm" id="btnNuevoProducto" title="Nuevo" onclick="window.location.href='/productos/nuevo'">
+            <i class="fas fa-plus"></i>
+        </button>
+        <button type="button" class="btn btn-outline-success btn-icon rounded-circle shadow-sm"
+                id="btnGuardarProducto" onclick="enviarFormularioAjax()" title="Guardar">
+            <i class="fas fa-save"></i>
+        </button>
+
+           <button type="button" class="btn btn-outline-warning btn-icon rounded-circle shadow-sm" id="btnActualizarProducto" title="Actualizar">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button type="button" class="btn btn-outline-danger btn-icon rounded-circle shadow-sm" id="btnEliminarProducto" title="Eliminar">
+            <i class="fas fa-trash"></i>
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-icon rounded-circle shadow-sm" id="btnCancelarProductoSec" onclick="cancelarProducto()" title="Volver">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+    </div>
+    <style>
+        .btn-icon {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: box-shadow 0.2s;
+        }
+        .btn-icon:hover {
+            box-shadow: 0 0 8px rgba(0,0,0,0.15);
+        }
+    </style>
+
     <div class="card">
         <div class="card-header bg-primary text-white">
             <h5 class="card-title mb-0" th:text="${producto.id != null ? 'Edit Product Information' : 'Product Information'}">Product Information</h5>
@@ -202,9 +238,9 @@
                                     <i class="fas fa-save me-1"></i>
                                     <span th:text="${producto.id != null ? 'Update Product' : 'Save Product'}">Save Product</span>
                                 </button>
-                                <a th:href="@{/productos}" class="btn btn-outline-secondary ms-2">
+                                <button type="button" class="btn btn-outline-secondary ms-2" id="btnCancelarProductoSec2" onclick="cancelarProducto()">
                                     <i class="fas fa-times me-1"></i> Cancel
-                                </a>
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -228,240 +264,6 @@
     </div>
 
 <th:block layout:fragment="scripts">
-    <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Product form loaded successfully');
-            
-            // Referencias a elementos del DOM
-            const form = document.getElementById('productoForm');
-            const codigoInput = document.getElementById('codigo');
-            const nombreInput = document.getElementById('nombre');
-            const productoId = document.querySelector('input[name="id"]').value;
-            const isNewProduct = !productoId;
-            
-            // Validación en tiempo real del código
-            let codigoTimeout;
-            codigoInput.addEventListener('input', function() {
-                clearTimeout(codigoTimeout);
-                codigoTimeout = setTimeout(() => {
-                    validateCodigo();
-                }, 500); // Esperar 500ms después de que el usuario deje de escribir
-            });
-            
-            function validateCodigo() {
-                const codigo = codigoInput.value.trim();
-                if (!codigo) return;
-                
-                const url = `/productos/validar-codigo?codigo=${encodeURIComponent(codigo)}` + 
-                           (productoId ? `&id=${productoId}` : '');
-                
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        const codigoError = document.getElementById('codigoError');
-                        const codigoSuccess = document.getElementById('codigoSuccess');
-                        
-                        if (data.existe) {
-                            codigoInput.classList.add('is-invalid');
-                            codigoInput.classList.remove('is-valid');
-                            codigoError.textContent = 'This code already exists. Please enter a different code.';
-                            codigoError.style.display = 'block';
-                            codigoSuccess.style.display = 'none';
-                        } else {
-                            codigoInput.classList.remove('is-invalid');
-                            codigoInput.classList.add('is-valid');
-                            codigoError.style.display = 'none';
-                            codigoSuccess.style.display = 'block';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error validating codigo:', error);
-                    });
-            }
-            
-            // Validación del formulario
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                event.stopPropagation();
-                
-                if (validateForm()) {
-                    // Verificar que el código no existe antes de enviar
-                    if (codigoInput.classList.contains('is-invalid')) {
-                        alert('Please correct the errors before saving.');
-                        return;
-                    }
-                    form.submit();
-                }
-                
-                form.classList.add('was-validated');
-            });
-            
-            function validateForm() {
-                let isValid = true;
-                
-                // Validar código
-                const codigo = document.getElementById('codigo');
-                if (!codigo.value.trim()) {
-                    isValid = false;
-                }
-                
-                // Validar nombre
-                const nombre = document.getElementById('nombre');
-                if (!nombre.value.trim()) {
-                    isValid = false;
-                }
-                
-                // Validar categoría
-                const categoria = document.getElementById('categoriaId');
-                if (!categoria.value) {
-                    isValid = false;
-                }
-                
-                // Validar precio
-                const precio = document.getElementById('precio');
-                if (!precio.value || parseFloat(precio.value) <= 0) {
-                    isValid = false;
-                }
-                
-                // Validar stock
-                const stock = document.getElementById('stock');
-                if (!stock.value || parseInt(stock.value) < 0) {
-                    isValid = false;
-                }
-                
-                return isValid;
-            }
-            
-            // Auto-generar código si está vacío (solo para productos nuevos)
-            if (isNewProduct && !codigoInput.value) {
-                nombreInput.addEventListener('blur', function() {
-                    if (!codigoInput.value && nombreInput.value) {
-                        // Generar código basado en el nombre
-                        const codigo = generateProductCode(nombreInput.value);
-                        codigoInput.value = codigo;
-                        validateCodigo(); // Validar el código generado
-                    }
-                });
-            }
-            
-            function generateProductCode(nombre) {
-                // Tomar las primeras 3 letras del nombre y agregar número aleatorio
-                const prefix = nombre.substring(0, 3).toUpperCase();
-                const suffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-                return prefix + suffix;
-            }
-            
-            // === MEJORAS PARA NUEVOS CAMPOS ===
-            
-            // Establecer fecha actual si está vacía (solo para productos nuevos)
-            const fechaAltaInput = document.getElementById('fechaAlta');
-            if (fechaAltaInput && !fechaAltaInput.value && isNewProduct) {
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                fechaAltaInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-            }
-            
-            // Establecer estatus por defecto
-            const estatusSelect = document.getElementById('estatus');
-            if (estatusSelect && !estatusSelect.value && isNewProduct) {
-                estatusSelect.value = 'ACTIVO';
-            }
-            
-            // Sugerir unidad basada en el tipo de producto
-            const tipoSelect = document.getElementById('tipo');
-            const unidadSelect = document.getElementById('unidad');
-            
-            if (tipoSelect && unidadSelect) {
-                tipoSelect.addEventListener('change', function() {
-                    const tipo = this.value;
-                    let sugerencia = '';
-                    
-                    switch(tipo) {
-                        case 'NORMAL':
-                            sugerencia = 'PIEZA';
-                            break;
-                        case 'SERIE':
-                            sugerencia = 'UNIDAD';
-                            break;
-                        case 'MATERIA_PRIMA':
-                            sugerencia = 'KG';
-                            break;
-                        case 'PRODUCTO_TERMINADO':
-                            sugerencia = 'PIEZA';
-                            break;
-                        case 'INSUMO':
-                            sugerencia = 'UNIDAD';
-                            break;
-                        case 'HERRAMIENTA':
-                            sugerencia = 'PIEZA';
-                            break;
-                        case 'EQUIPO':
-                            sugerencia = 'UNIDAD';
-                            break;
-                        case 'CONSUMIBLE':
-                            sugerencia = 'PAQUETE';
-                            break;
-                        case 'SERVICIO':
-                            sugerencia = 'PIEZA';
-                            break;
-                        default:
-                            sugerencia = 'UNIDAD';
-                    }
-                    
-                    if (sugerencia && !unidadSelect.value) {
-                        unidadSelect.value = sugerencia;
-                        
-                        // Mostrar notificación visual
-                        const notification = document.createElement('div');
-                        notification.className = 'alert alert-info alert-dismissible fade show mt-2';
-                        notification.innerHTML = `
-                            <i class="fas fa-info-circle me-2"></i>
-                            Unidad sugerida: <strong>${sugerencia}</strong> para tipo <strong>${tipo.replace('_', ' ')}</strong>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        `;
-                        unidadSelect.parentNode.appendChild(notification);
-                        
-                        // Auto-remover después de 3 segundos
-                        setTimeout(() => {
-                            if (notification.parentNode) {
-                                notification.remove();
-                            }
-                        }, 3000);
-                    }
-                });
-            }
-            
-            // Vista previa de imagen subida
-            document.getElementById('imagen').addEventListener('change', function(event) {
-                const preview = document.getElementById('preview');
-                preview.innerHTML = '';
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        preview.innerHTML = `<img src='${e.target.result}' class='img-thumbnail' style='max-width:200px; max-height:200px;'>`;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        });
-
-        var toastMessage = /*[[${toastMessage}]]*/ null;
-        var toastType = /*[[${toastType}]]*/ 'success';
-        document.addEventListener('DOMContentLoaded', function() {
-            if (toastMessage) {
-                var toastEl = document.getElementById('mainToast');
-                if (toastEl) {
-                    var toast = new bootstrap.Toast(toastEl, { delay: 3500 });
-                    toast.show();
-                }
-            }
-        });
-    </script>
 </th:block>
 
 <div id="loadingOverlay" class="loading-overlay" style="display: none;">
@@ -475,48 +277,6 @@
     </div>
 </div>
 
-<script>
-function showLoadingOverlay() {
-    document.getElementById('loadingOverlay').style.display = 'block';
-}
-function hideLoadingOverlay() {
-    document.getElementById('loadingOverlay').style.display = 'none';
-}
-function enviarFormularioAjax() {
-    alert('Evento AJAX disparado');
-    console.log('Evento AJAX disparado');
-    var btn = document.getElementById('btnGuardarProducto');
-    var form = document.getElementById('productoForm');
-    if (!form) {
-        alert('No se encontró el formulario con id productoForm');
-        console.error('No se encontró el formulario con id productoForm');
-        btn.disabled = false;
-        hideLoadingOverlay();
-        return;
-    }
-    var formData = new FormData(form);
-    btn.disabled = true;
-    showLoadingOverlay();
-    fetch(form.getAttribute('action'), {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Error al guardar el producto');
-        return response.text();
-    })
-    .then(html => {
-        window.location.href = '/productos';
-    })
-    .catch(error => {
-        alert(error.message);
-    })
-    .finally(() => {
-        btn.disabled = false;
-        hideLoadingOverlay();
-    });
-}
-</script>
-
+<script src="/js/producto.js"></script>
 </body>
 </html>
