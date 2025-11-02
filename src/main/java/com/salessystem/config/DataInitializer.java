@@ -321,7 +321,11 @@ public class DataInitializer implements CommandLineRunner {
             cliente.setEmail(email);
             cliente.setTelefono(telefono);
             cliente.setDireccion(direccion);
-            
+            cliente.setPais("El Salvador");
+            cliente.setCodigo("C" + String.format("%04d", existingClientes.size() + 1)); // Código secuencial
+            cliente.setEstatus("ACTIVO");
+            cliente.setZonaimpuestos("GRAVADO");
+            cliente.setCondicion("Contado");
             clienteService.save(cliente);
         }
     }

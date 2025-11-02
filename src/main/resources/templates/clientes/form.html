@@ -26,31 +26,98 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-2">
+                        <label for="codigo" class="form-label">Codigo</label>
+                        <input type="text" class="form-control" id="codigo" th:field="*{codigo}"
+                               th:classappend="${#fields.hasErrors('codigo')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('codigo')}"
+                             th:errors="*{codigo}"></div>
+                    </div>
+                    <div class="col-md-4">
                         <label for="nombre" class="form-label">Nombre</label>
                         <input type="text" class="form-control" id="nombre" th:field="*{nombre}"
                                th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid' : ''">
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}"
                              th:errors="*{nombre}"></div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="apellido" class="form-label">Apellido</label>
                         <input type="text" class="form-control" id="apellido" th:field="*{apellido}"
                                th:classappend="${#fields.hasErrors('apellido')} ? 'is-invalid' : ''">
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('apellido')}"
                              th:errors="*{apellido}"></div>
                     </div>
+                    <div class="col-md-2">
+                        <label for="estatus" class="form-label">Estatus</label>
+                        <input type="text" class="form-control" id="estatus" th:field="*{estatus}"
+                               th:classappend="${#fields.hasErrors('estatus')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('estatus')}"
+                             th:errors="*{estatus}"></div>
+                    </div>
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" th:field="*{email}"
-                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
-                        <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}"
-                             th:errors="*{email}"></div>
+                    <div class="col-md-2">
+                        <label for="dui" class="form-label">Dui</label>
+                        <input type="text" class="form-control" id="dui" th:field="*{dui}"
+                               th:classappend="${#fields.hasErrors('dui')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('dui')}"
+                             th:errors="*{dui}"></div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-2">
+                        <label for="nit" class="form-label">NIT</label>
+                        <input type="text" class="form-control" id="nit" th:field="*{nit}"
+                               th:classappend="${#fields.hasErrors('nit')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('nit')}"
+                             th:errors="*{nit}"></div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="nrc" class="form-label">NRC</label>
+                        <input type="text" class="form-control" id="nrc" th:field="*{nrc}"
+                               th:classappend="${#fields.hasErrors('nrc')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('nrc')}"
+                             th:errors="*{nrc}"></div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="condicion" class="form-label">Condicion</label>
+                        <input type="text" class="form-control" id="condicion" th:field="*{condicion}"
+                               th:classappend="${#fields.hasErrors('condicion')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('condicion')}"
+                             th:errors="*{condicion}"></div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="zonaimpuestos" class="form-label">Zona impuestos</label>
+                        <input type="text" class="form-control" id="zonaimpuestos" th:field="*{zonaimpuestos}"
+                               th:classappend="${#fields.hasErrors('zonaimpuestos')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('zonaimpuestos')}"
+                             th:errors="*{zonaimpuestos}"></div>
+                    </div>
+
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <label for="pais" class="form-label">pais</label>
+                        <input type="pais" class="form-control" id="pais" th:field="*{pais}"
+                               th:classappend="${#fields.hasErrors('pais')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('pais')}"
+                             th:errors="*{pais}"></div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="departamento" class="form-label">Departamento</label>
+                        <input type="departamento" class="form-control" id="departamento" th:field="*{departamento}"
+                               th:classappend="${#fields.hasErrors('pais')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('departamento')}"
+                             th:errors="*{departamento}"></div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="municipio" class="form-label">Municipio</label>
+                        <input type="municipio" class="form-control" id="municipio" th:field="*{municipio}"
+                               th:classappend="${#fields.hasErrors('municipio')} ? 'is-invalid' : ''">
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('municipio')}"
+                             th:errors="*{municipio}"></div>
+                    </div>
+                    <div class="col-md-2">
                         <label for="telefono" class="form-label">Teléfono</label>
                         <input type="text" class="form-control" id="telefono" th:field="*{telefono}"
                                placeholder="Ej: +1 555-123-4567 o 555 123 4567"
@@ -58,6 +125,15 @@
                         <div class="form-text">Formato: 7-15 dígitos, se permiten espacios, guiones y paréntesis</div>
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('telefono')}"
                              th:errors="*{telefono}"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="text" class="form-control" id="email" th:field="*{email}"
+                               placeholder="Ej: +1 555-123-4567 o 555 123 4567"
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}"
+                             th:errors="*{email}"></div>
                     </div>
                 </div>
 
