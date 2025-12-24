@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.persistence.*;
@@ -35,6 +36,7 @@ public class Venta {
     
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     @Column(name = "fecha_emision")
+    @JsonFormat(pattern = "dd/MM/yyyy") // Para JSON - ¡ESTO FALTA!
     private LocalDate fechaEmision;
     
     @Column(precision = 10, scale = 2)

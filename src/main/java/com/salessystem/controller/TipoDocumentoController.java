@@ -1,5 +1,6 @@
 package com.salessystem.controller;
 
+import com.salessystem.dto.TipoDocumentoDTO;
 import com.salessystem.model.TipoDocumento;
 import com.salessystem.service.ComportamientoService;
 import com.salessystem.service.TipoDocumentoService;
@@ -163,5 +164,18 @@ public class TipoDocumentoController {
             tiposDocumento = tipoDocumentoService.findAllActivos();
         }
         return ResponseEntity.ok(tiposDocumento);
+    }
+
+    @GetMapping("/find/{id}")
+    @ResponseBody  // Esto es IMPORTANTE
+    public TipoDocumentoDTO getDocumentoSimple(@PathVariable Long id) {
+        Optional<TipoDocumento> optional = tipoDocumentoService.findById(id);
+
+        if (optional.isPresent()) {
+            // Convertir entidad a DTO
+            return new TipoDocumentoDTO(optional.get());
+        } else {
+            return null; // o puedes devolver un DTO vacío
+        }
     }
 }

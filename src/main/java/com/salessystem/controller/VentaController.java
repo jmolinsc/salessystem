@@ -15,6 +15,7 @@ import java.beans.PropertyEditorSupport;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -68,20 +69,14 @@ public class VentaController {
     @GetMapping("/nueva")
     public String mostrarFormularioNuevaVenta(Model model) {
         Venta venta = new Venta();
-        // Convertir la fecha actual a LocalDate para compatibilidad con HTML5 date input
-        LocalDate fechaActual = LocalDate.now();
-        Date fecha = Date.from(fechaActual.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        venta.setFecha(fecha);
+        venta.setFechaEmision(LocalDate.now());
         venta.setTotal(BigDecimal.ZERO);
-        // Asignar SIN_AFECTAR por defecto para nuevas ventas
         venta.setEstatus(EstatusVenta.SIN_AFECTAR);
 
         model.addAttribute("venta", venta);
         model.addAttribute("clientes", clienteRepository.findAll());
         model.addAttribute("productos", productoRepository.findAll());
         model.addAttribute("tiposDocumento", tipoDocumentoService.findByModulo("VTA"));
-        // Agregar la fecha como LocalDate para el formulario
-        model.addAttribute("fechaActual", fechaActual);
 
         return "ventas/form";
     }
@@ -173,7 +168,10 @@ public class VentaController {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
             model.addAttribute("fechaActual", fechaVenta);
-            
+            // Formatear fecha para mostrar "día/mes/año"
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            model.addAttribute("fechaActualStr", fechaVenta.format(fmt));
+
             // Determinar si el formulario debe estar deshabilitado
             boolean formularioDeshabilitado = ventaGuardada.getEstatus() == EstatusVenta.CONCLUIDO || 
                                             ventaGuardada.getEstatus() == EstatusVenta.PENDIENTE;
@@ -208,6 +206,8 @@ public class VentaController {
             
             LocalDate fechaActual = LocalDate.now();
             model.addAttribute("fechaActual", fechaActual);
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            model.addAttribute("fechaActualStr", fechaActual.format(fmt));
             model.addAttribute("formularioDeshabilitado", false);
             
             // Mensaje de error
@@ -232,16 +232,10 @@ public class VentaController {
         Venta venta = ventaService.obtenerVentaPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Venta no encontrada: " + id));
 
-        // Convertir fecha para compatibilidad con HTML5
-        LocalDate fechaVenta = venta.getFecha().toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-
         model.addAttribute("venta", venta);
         model.addAttribute("clientes", clienteRepository.findAll());
         model.addAttribute("productos", productoRepository.findAll());
         model.addAttribute("tiposDocumento", tipoDocumentoService.findByModulo("VTA"));
-        model.addAttribute("fechaActual", fechaVenta);
         model.addAttribute("esEdicion", true);
         
         // Determinar si el formulario debe estar deshabilitado al editar
@@ -317,7 +311,10 @@ public class VentaController {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
             model.addAttribute("fechaActual", fechaVenta);
-            
+            // Formatear fecha para mostrar "día/mes/año"
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            model.addAttribute("fechaActualStr", fechaVenta.format(fmt));
+
             // Determinar si el formulario debe estar deshabilitado
             boolean formularioDeshabilitado = ventaActualizada.getEstatus() == EstatusVenta.CONCLUIDO || 
                                             ventaActualizada.getEstatus() == EstatusVenta.PENDIENTE;
@@ -344,11 +341,14 @@ public class VentaController {
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
             model.addAttribute("fechaActual", fechaVenta);
-            
-            boolean formularioDeshabilitado = ventaOriginal.getEstatus() == EstatusVenta.CONCLUIDO || 
-                                            ventaOriginal.getEstatus() == EstatusVenta.PENDIENTE;
-            model.addAttribute("formularioDeshabilitado", formularioDeshabilitado);
-            
+            // Formatear fecha para mostrar "día/mes/año"
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            model.addAttribute("fechaActualStr", fechaVenta.format(fmt));
+
+             boolean formularioDeshabilitado = ventaOriginal.getEstatus() == EstatusVenta.CONCLUIDO ||
+                                             ventaOriginal.getEstatus() == EstatusVenta.PENDIENTE;
+             model.addAttribute("formularioDeshabilitado", formularioDeshabilitado);
+
             // Mensaje de error
             model.addAttribute("toastMessage", "Error al actualizar la venta: " + e.getMessage());
             model.addAttribute("toastType", "error");

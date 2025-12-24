@@ -51,6 +51,8 @@ public class TipoDocumentoService {
         return tipoDocumentoRepository.findById(id);
     }
 
+
+
     // Obtener tipo de documento por mov
     @Transactional(readOnly = true)
     public Optional<TipoDocumento> findByMov(String mov) {

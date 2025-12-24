@@ -10,10 +10,7 @@
 <body>
 <div layout:fragment="content">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="h3 mb-1" th:text="${producto.id != null ? 'Edit Product' : 'New Product'}">Product</h2>
-            <p class="text-muted mb-0">Manage your product information</p>
-        </div>
+
         <a th:href="@{/productos}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i>Back to Products
         </a>
@@ -26,7 +23,7 @@
             <i class="fas fa-plus"></i>
         </button>
         <button type="button" class="btn btn-outline-success btn-icon rounded-circle shadow-sm"
-                id="btnGuardarProducto" onclick="enviarFormularioAjax()" title="Guardar">
+                id="btnGuardarProducto" onclick="enviarFormularioProductoAjax()" title="Guardar">
             <i class="fas fa-save"></i>
         </button>
 
@@ -234,7 +231,7 @@
                             </div>
 
                             <div class="col-12 mt-4">
-                                <button type="button" class="btn btn-primary" id="btnGuardarProducto" onclick="enviarFormularioAjax()">
+                                <button type="button" class="btn btn-primary" id="btnGuardarProducto" onclick="enviarFormularioProductoAjax()">
                                     <i class="fas fa-save me-1"></i>
                                     <span th:text="${producto.id != null ? 'Update Product' : 'Save Product'}">Save Product</span>
                                 </button>
@@ -277,6 +274,6 @@
     </div>
 </div>
 
-<script src="/js/producto.js"></script>
+<script src="/js/productos.js"></script>
 </body>
 </html>
