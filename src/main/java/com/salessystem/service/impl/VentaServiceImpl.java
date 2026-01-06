@@ -364,7 +364,7 @@ public class VentaServiceImpl implements VentaService {
         if (saldo.compareTo(BigDecimal.ZERO) > 0) {
             // Crear cuenta por cobrar con referencias ya persistidas
             com.salessystem.model.CuentaPorCobrar cp = new com.salessystem.model.CuentaPorCobrar();
-            cp.setVenta(venta);
+            cp.setVenta(venta);//
             com.salessystem.model.Cliente cliente = venta.getCliente();
             if (cliente != null && cliente.getId() != null) {
                 cliente = clienteRepository.findById(cliente.getId()).orElse(cliente);
