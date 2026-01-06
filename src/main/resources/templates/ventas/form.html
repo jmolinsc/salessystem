@@ -9,15 +9,12 @@
 
 <body>
 <div layout:fragment="content">
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-        <div class="loading-content">
-            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <div class="loading-text mt-3">
-                <span id="loadingMessage">Procesando...</span>
-            </div>
+
+
+    <!-- Mensaje Toast (contenedor global ya existe en layout, pero dejamos contenedor local por compatibilidad) -->
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+            <!-- Los toasts se insertan dinámicamente aquí -->
         </div>
     </div>
 
@@ -107,10 +104,7 @@
                     <label for="fechaEmision" class="form-label">Fecha Emision <span class="text-danger">*</span></label>
                     <input type="date" class="form-control" th:field="*{fechaEmision}" id="fechaEmision" required th:disabled="${formularioDeshabilitado}">
                 </div>
-                <div class="col-md-3">
-                    <label for="fecha" class="form-label">Date <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" th:field="*{fecha}" id="fecha" required th:disabled="${formularioDeshabilitado}">
-                </div>
+
 
             </div>
 
@@ -138,18 +132,22 @@
                 <div class="col-md-2">
                     <label for="descuento" class="form-label">Descuento</label>
                     <div class="input-group">
-                        <span class="input-group-text">$</span>
+                        <span class="input-group-text">%</span>
                         <input type="number" class="form-control" th:field="*{descuento}" id="descuento" 
-                               step="0.01" min="0" placeholder="0.00" th:disabled="${formularioDeshabilitado}">
+                               step="1" min="0" placeholder="0" th:disabled="${formularioDeshabilitado}">
                     </div>
                 </div>
                 <div class="col-md-2">
                     <label for="total" class="form-label">Total</label>
-                    <input type="text" class="form-control" th:field="*{total}" id="total" readonly>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="text" class="form-control" th:field="*{total}" id="total" readonly
+                               step="0.01" min="0" placeholder="0.00" th:disabled="${formularioDeshabilitado}">
+                    </div>
                 </div>
             </div>
 
-                <div class="row mb-3">
+                <div class="row mb-3 g-3">
                     <div class="col-md-12">
                         <h5>Detalle de Venta</h5>
                         <button type="button" id="agregarProductoBtn" class="btn btn-primary mb-3" 
@@ -306,12 +304,37 @@
 
 
 </div>
-<!-- Mensaje Toast (contenedor global ya existe en layout, pero dejamos contenedor local por compatibilidad) -->
-<div aria-live="polite" aria-atomic="true" class="position-relative">
-    <div id="toastContainer" class="toast-container position-absolute top-0 start-50 translate-middle-x p-3" style="z-index: 9999">
-        <!-- Los toasts se insertan dinámicamente -->
-    </div>
+
 </div>
+<!-- Loading Overlay -->
+<div id="loadingOverlay"
+     class="position-fixed top-0 start-0 w-100 vh-100"
+     style="
+        display: none;
+        z-index: 9999;
+        background-color: rgba(0, 0, 0, 0.75);
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.3s ease;
+        opacity: 0;
+     ">
+    <div class="text-center p-5 rounded-3"
+         style="
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 300px;
+         ">
+        <div class="spinner-border text-primary mb-3"
+             style="width: 3rem; height: 3rem;"
+             role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <div>
+            <h5 class="text-white mb-2" id="loadingMessage">Guardando...</h5>
+            <p class="text-white-50 mb-0" id="loadingSubMessage">Procesando la venta</p>
+        </div>
+    </div>
 </div>
 </body>
 </html>

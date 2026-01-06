@@ -22,7 +22,7 @@ public class Venta {
     private String numeroFactura;
     
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date fecha;
+    private Date ultimocambio;
     
     private BigDecimal total;
     
@@ -33,11 +33,10 @@ public class Venta {
     
     @Column(name = "mov_id")
     private Long movId;
-    
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "fecha_emision")
-    @JsonFormat(pattern = "dd/MM/yyyy") // Para JSON - ¡ESTO FALTA!
-    private LocalDate fechaEmision;
+    private Date fechaEmision;
     
     @Column(precision = 10, scale = 2)
     private BigDecimal descuento;
@@ -63,7 +62,6 @@ public class Venta {
 
     // Constructores
     public Venta() {
-        this.fechaEmision = LocalDate.now();
         this.estatus = EstatusVenta.PENDIENTE;
         this.condicion = CondicionPago.CONTADO;
         this.descuento = BigDecimal.ZERO;
@@ -85,12 +83,12 @@ public class Venta {
         this.numeroFactura = numeroFactura;
     }
 
-    public Date getFecha() {
-        return fecha;
+    public Date getUltimocambio() {
+        return ultimocambio;
     }
 
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
+    public void setUltimocambio(Date ultimocambio) {
+        this.ultimocambio = ultimocambio;
     }
 
     public BigDecimal getTotal() {
@@ -142,11 +140,11 @@ public class Venta {
         this.movId = movId;
     }
 
-    public LocalDate getFechaEmision() {
+    public Date getFechaEmision() {
         return fechaEmision;
     }
 
-    public void setFechaEmision(LocalDate fechaEmision) {
+    public void setFechaEmision(Date fechaEmision) {
         this.fechaEmision = fechaEmision;
     }
 

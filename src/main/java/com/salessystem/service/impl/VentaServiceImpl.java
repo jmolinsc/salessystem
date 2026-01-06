@@ -4,7 +4,7 @@ import com.salessystem.model.Venta;
 import com.salessystem.model.EstatusVenta;
 import com.salessystem.repository.VentaRepository;
 import com.salessystem.repository.ProductoRepository;
-import com.salessystem.repository.CuentaPorCobrarRepository;
+import com.salessystem.service.CuentaPorCobrarService;
 import com.salessystem.repository.ClienteRepository;
 import com.salessystem.service.EmailService;
 import com.salessystem.service.VentaService;
@@ -33,18 +33,18 @@ public class VentaServiceImpl implements VentaService {
 
     private final VentaRepository ventaRepository;
     private final ProductoRepository productoRepository;
-    private final CuentaPorCobrarRepository cuentaPorCobrarRepository;
+    private final CuentaPorCobrarService cuentaPorCobrarService;
     private final ClienteRepository clienteRepository;
     private final EmailService emailService;
 
     public VentaServiceImpl(VentaRepository ventaRepository,
                             ProductoRepository productoRepository,
-                            CuentaPorCobrarRepository cuentaPorCobrarRepository,
+                            CuentaPorCobrarService cuentaPorCobrarService,
                             ClienteRepository clienteRepository,
                             EmailService emailService) {
         this.ventaRepository = ventaRepository;
         this.productoRepository = productoRepository;
-        this.cuentaPorCobrarRepository = cuentaPorCobrarRepository;
+        this.cuentaPorCobrarService = cuentaPorCobrarService;
         this.clienteRepository = clienteRepository;
         this.emailService = emailService;
     }
@@ -374,7 +374,7 @@ public class VentaServiceImpl implements VentaService {
             java.util.Date vencimiento = java.util.Date.from(venc.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant());
             cp.setFechaVencimiento(vencimiento);
             cp.setEstado("PENDIENTE");
-            cuentaPorCobrarRepository.save(cp);
+            cuentaPorCobrarService.crearCuentaPorCobrar(cp);
          }
 
         // 3) Enviar email de notificación al cliente (si tiene email)

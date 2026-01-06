@@ -20,22 +20,22 @@
                         <i class="fas fa-info-circle me-2"></i>Información de la Venta
                     </h6>
                     <div class="mb-2">
-                        <strong>Fecha:</strong> 
-                        <span class="text-muted" th:text="${venta.fecha != null ? #dates.format(venta.fecha, 'dd/MM/yyyy') : 'Sin fecha'}"></span>
+                        <strong>Fecha Emisión:</strong> 
+                        <span class="text-muted" th:text="${venta.fechaEmision != null ? #dates.format(venta.fechaEmision, 'dd/MM/yyyy') : 'Sin fecha'}"></span>
                     </div>
                     <div class="mb-2">
-                        <strong>Fecha Emisión:</strong> 
-                        <span class="text-muted" th:text="${venta.fechaEmision != null ? #temporals.format(venta.fechaEmision, 'dd/MM/yyyy') : 'Sin fecha'}"></span>
+                        <strong>Ultimo Cambio:</strong>
+                        <span class="text-muted" th:text="${venta.ultimocambio != null ? #dates.format(venta.ultimocambio, 'dd/MM/yyyy HH:mm:ss') : 'Sin fecha'}"></span>
                     </div>
                     <div class="mb-2">
                         <strong>Número de Factura:</strong> 
-                        <span class="badge bg-secondary" th:text="${venta.numeroFactura}"></span>
+                        <span class="badge bg-secondary" th:text="${venta.movId}"></span>
                     </div>
                 </div>
                 
                 <div class="col-md-4">
                     <h6 class="fw-bold text-secondary">
-                        <i class="fas fa-file-alt me-2"></i>Documento
+                        <i class="fas fa-file-alt me-2"></i>Mov
                     </h6>
                     <div class="mb-2">
                         <strong>Tipo:</strong> 

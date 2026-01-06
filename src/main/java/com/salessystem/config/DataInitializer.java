@@ -135,6 +135,11 @@ public class DataInitializer implements CommandLineRunner {
         createMenuIfNotExists("Ajuste", "/inventario/ajuste", "fas fa-balance-scale", 5, false, inventarioMenuId);
         createMenuIfNotExists("Alertas", "/inventario/alertas", "fas fa-exclamation-triangle", 6, false, inventarioMenuId);
         
+        // Cuentas por cobrar (menú nuevo)
+        Long cuentasCobrarMenuId = createMenuIfNotExists("Cuentas por Cobrar", "/cuentas-por-cobrar", "fas fa-file-invoice-dollar", 11, true, null);
+        createMenuIfNotExists("Lista Cuentas por Cobrar", "/cuentas-por-cobrar/list", "fas fa-list", 1, false, cuentasCobrarMenuId);
+        createMenuIfNotExists("Nueva Cuenta por Cobrar", "/cuentas-por-cobrar/nuevo", "fas fa-plus", 2, false, cuentasCobrarMenuId);
+
         // Reportes
         createMenuIfNotExists("Reportes", "/reportes", "fas fa-chart-bar", 9, false, null);
         

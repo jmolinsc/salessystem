@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Cuenta por Cobrar</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1">Cuenta por Cobrar</h2>
+            <p class="text-muted mb-0">Formulario</p>
+        </div>
+        <a th:href="@{/cuentas-por-cobrar}" class="btn btn-outline-secondary">Volver</a>
+    </div>
+
+    <div class="card-custom">
+        <div class="card-body">
+            <form th:action="@{/cuentas-por-cobrar/guardar}" th:object="${cuenta}" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Venta</label>
+                    <input type="text" th:field="*{venta.id}" class="form-control" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Cliente</label>
+                    <input type="text" th:value="${cuenta.cliente != null ? cuenta.cliente.nombre + ' ' + cuenta.cliente.apellido : ''}" class="form-control" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Importe</label>
+                    <input type="number" step="0.01" th:field="*{importe}" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Fecha Emisión</label>
+                    <input type="date" th:field="*{fechaEmision}" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Fecha Vencimiento</label>
+                    <input type="date" th:field="*{fechaVencimiento}" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Estado</label>
+                    <select th:field="*{estado}" class="form-control">
+                        <option value="PENDIENTE">PENDIENTE</option>
+                        <option value="PAGADA">PAGADA</option>
+                        <option value="ANULADA">ANULADA</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary-custom">Guardar</button>
+                    <a th:href="@{/cuentas-por-cobrar}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+

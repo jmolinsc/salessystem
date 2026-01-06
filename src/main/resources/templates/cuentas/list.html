@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout-nickelfox}">
+
+<head>
+    <title>Cuentas por Cobrar</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-1">Cuentas por Cobrar</h2>
+            <p class="text-muted mb-0">Lista de cuentas por cobrar</p>
+        </div>
+        <a th:href="@{/cuentas-por-cobrar/nuevo}" class="btn btn-primary-custom">
+            <i class="fas fa-plus me-2"></i>Nueva Cuenta
+        </a>
+    </div>
+
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h5 class="card-title">Listado</h5>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-custom" id="cuentasTable" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Venta</th>
+                            <th>Cliente</th>
+                            <th>Importe</th>
+                            <th>Emisión</th>
+                            <th>Vencimiento</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="cp : ${cuentas}">
+                            <td th:text="${cp.id}"></td>
+                            <td th:text="${cp.venta != null ? cp.venta.id : 'N/A'}"></td>
+                            <td th:text="${cp.cliente != null ? cp.cliente.nombre + ' ' + cp.cliente.apellido : 'N/A'}"></td>
+                            <td th:text="${cp.importe != null ? ('$' + #numbers.formatDecimal(cp.importe, 1, 2)) : '-'}"></td>
+                            <td th:text="${cp.fechaEmision != null ? #dates.format(cp.fechaEmision, 'dd/MM/yyyy') : '-'}"></td>
+                            <td th:text="${cp.fechaVencimiento != null ? #dates.format(cp.fechaVencimiento, 'dd/MM/yyyy') : '-'}"></td>
+                            <td th:text="${cp.estado}"></td>
+                            <td>
+                                <a th:href="@{/cuentas-por-cobrar/editar/{id}(id=${cp.id})}" class="btn btn-outline-warning btn-sm">Editar</a>
+                                <a th:href="@{/cuentas-por-cobrar/eliminar/{id}(id=${cp.id})}" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Seguro?');">Anular</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="none">
+        $(document).ready(function() {
+            initializeDataTableWithPreset('#cuentasTable','cuentas');
+        });
+    </script>
+</th:block>
+</body>
+</html>
