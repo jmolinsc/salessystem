@@ -134,12 +134,16 @@ public class VentaServiceImpl implements VentaService {
     }
     
     // Método privado para generar el siguiente correlativo
-    private Long generateNextMovId() {
+    private synchronized Long generateNextMovId() {
         Long maxMovId = ventaRepository.findMaxMovId();
-        if (maxMovId == null) {
+        logger.debug("generateNextMovId - maxMovId={}", maxMovId);
+        if (maxMovId == null || maxMovId == 0L) {
+            logger.debug("generateNextMovId - asignando primer correlativo 1");
             return 1L; // primer correlativo
         }
-        return maxMovId + 1;
+        Long next = maxMovId + 1;
+        logger.debug("generateNextMovId - asignando correlativo {}", next);
+        return next;
     }
     
     // ============================================
@@ -318,6 +322,7 @@ public class VentaServiceImpl implements VentaService {
     }
     
     private void procesarLogicaFacturaAfectar(Venta venta) {
+        venta.setMovId(generateNextMovId());
         // 1) Asegurar que la venta esté persistida
         if (venta.getId() == null) {
             venta = ventaRepository.save(venta);
