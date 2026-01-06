@@ -13,17 +13,22 @@ import org.springframework.web.bind.WebDataBinder;
 import jakarta.servlet.http.HttpServletRequest;
 import java.beans.PropertyEditorSupport;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @Controller
 @RequestMapping("/ventas")
 public class VentaController {
+
+    private static final Logger logger = LoggerFactory.getLogger(VentaController.class);
 
     private final VentaService ventaService;
     private final ProductoRepository productoRepository;
@@ -67,9 +72,9 @@ public class VentaController {
     }
 
     @GetMapping("/nueva")
-    public String mostrarFormularioNuevaVenta(Model model) {
+    public String mostrarFormularioNuevaVenta(Model model) throws ParseException {
         Venta venta = new Venta();
-        venta.setFechaEmision(LocalDate.now());
+        venta.setFechaEmision(new Date());
         venta.setTotal(BigDecimal.ZERO);
         venta.setEstatus(EstatusVenta.SIN_AFECTAR);
 
@@ -82,7 +87,7 @@ public class VentaController {
     }
 
     @GetMapping("/nuevo")
-    public String mostrarFormularioNuevoVenta(Model model) {
+    public String mostrarFormularioNuevoVenta(Model model) throws ParseException {
         return mostrarFormularioNuevaVenta(model);
     }
 
@@ -122,7 +127,7 @@ public class VentaController {
             System.out.println(key + " = " + String.join(", ", values));
         });
         
-        System.out.println("Fecha: " + venta.getFecha());
+        System.out.println("Fecha: " + venta.getUltimocambio());
         System.out.println("Cliente ID: " + (venta.getCliente() != null ? venta.getCliente().getId() : "null"));
         System.out.println("Total: " + venta.getTotal());
         System.out.println("Estatus: " + venta.getEstatus());
@@ -155,16 +160,37 @@ public class VentaController {
             // Recargar la venta desde la base de datos para obtener todos los detalles
             ventaGuardada = ventaService.obtenerVentaPorId(ventaGuardada.getId())
                     .orElse(ventaGuardada);
-            
+
+            // Forzar inicialización de relaciones para evitar lazy exceptions durante el render
+            if (ventaGuardada.getDetalles() != null) {
+                for (com.salessystem.model.DetalleVenta d : ventaGuardada.getDetalles()) {
+                    if (d.getProducto() != null) {
+                        // accesar campos simples para inicializar proxies
+                        d.getProducto().getId();
+                        d.getProducto().getNombre();
+                    }
+                    // inicializar subtotal/cantidad
+                    d.getCantidad();
+                    d.getSubtotal();
+                }
+            }
+            if (ventaGuardada.getCliente() != null) {
+                ventaGuardada.getCliente().getId();
+                ventaGuardada.getCliente().getNombre();
+            }
+
             // Preparar datos para la vista
-            model.addAttribute("venta", ventaGuardada);
+            model.addAttribute("venta", toSafeVenta(ventaGuardada));
             model.addAttribute("clientes", clienteRepository.findAll());
             model.addAttribute("productos", productoRepository.findAll());
             model.addAttribute("tiposDocumento", tipoDocumentoService.findByModulo("VTA"));
             model.addAttribute("esEdicion", true); // Marcar como edición después de guardar
             
             // Convertir fecha para el formulario
-            LocalDate fechaVenta = ventaGuardada.getFecha().toInstant()
+            if (ventaGuardada.getUltimocambio() == null) {
+                ventaGuardada.setUltimocambio(new Date());
+            }
+            LocalDate fechaVenta = ventaGuardada.getUltimocambio().toInstant()
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
             model.addAttribute("fechaActual", fechaVenta);
@@ -187,7 +213,7 @@ public class VentaController {
             String mensaje = "afectar".equals(accion) ? "Venta afectada exitosamente!" : "Venta guardada exitosamente!";
             model.addAttribute("toastMessage", mensaje);
             model.addAttribute("toastType", "success");
-            
+
             System.out.println("=== DEBUG TOAST ===");
             System.out.println("Toast Message: " + mensaje);
             System.out.println("Toast Type: success");
@@ -198,22 +224,25 @@ public class VentaController {
             return "ventas/form";
             
         } catch (Exception e) {
+            // Log completo del error para diagnóstico
+            logger.error("Error guardando/actualizando venta", e);
+
             // En caso de error, preparar datos para la vista
             model.addAttribute("venta", venta);
             model.addAttribute("clientes", clienteRepository.findAll());
             model.addAttribute("productos", productoRepository.findAll());
             model.addAttribute("tiposDocumento", tipoDocumentoService.findByModulo("VTA"));
-            
+
             LocalDate fechaActual = LocalDate.now();
             model.addAttribute("fechaActual", fechaActual);
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             model.addAttribute("fechaActualStr", fechaActual.format(fmt));
             model.addAttribute("formularioDeshabilitado", false);
-            
-            // Mensaje de error
-            model.addAttribute("toastMessage", "Error al guardar la venta: " + e.getMessage());
+
+            // Mensaje de error: mostrar genérico y registrar detalle en logs
+            model.addAttribute("toastMessage", "Error al guardar la venta. Revise los logs para más detalles.");
             model.addAttribute("toastType", "error");
-            
+
             return "ventas/form";
         }
     }
@@ -300,14 +329,17 @@ public class VentaController {
                     .orElse(ventaActualizada);
             
             // Preparar datos para la vista
-            model.addAttribute("venta", ventaActualizada);
+            model.addAttribute("venta", toSafeVenta(ventaActualizada));
             model.addAttribute("clientes", clienteRepository.findAll());
             model.addAttribute("productos", productoRepository.findAll());
             model.addAttribute("tiposDocumento", tipoDocumentoService.findByModulo("VTA"));
             model.addAttribute("esEdicion", true);
             
             // Convertir fecha para el formulario
-            LocalDate fechaVenta = ventaActualizada.getFecha().toInstant()
+            if (ventaActualizada.getUltimocambio() == null) {
+                ventaActualizada.setUltimocambio(new Date());
+            }
+            LocalDate fechaVenta = ventaActualizada.getUltimocambio().toInstant()
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
             model.addAttribute("fechaActual", fechaVenta);
@@ -337,7 +369,8 @@ public class VentaController {
             model.addAttribute("tiposDocumento", tipoDocumentoService.findByModulo("VTA"));
             model.addAttribute("esEdicion", true);
             
-            LocalDate fechaVenta = ventaOriginal.getFecha().toInstant()
+            LocalDate fechaVenta = ventaOriginal.getUltimocambio() == null ? LocalDate.now() :
+                    ventaOriginal.getUltimocambio().toInstant()
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
             model.addAttribute("fechaActual", fechaVenta);
@@ -370,6 +403,52 @@ public class VentaController {
             redirectAttributes.addFlashAttribute("error", "Error al eliminar la venta: " + e.getMessage());
         }
         return "redirect:/ventas";
+    }
+
+    private com.salessystem.model.Venta toSafeVenta(com.salessystem.model.Venta venta) {
+        if (venta == null) return null;
+        com.salessystem.model.Venta safe = new com.salessystem.model.Venta();
+        safe.setId(venta.getId());
+        safe.setMovId(venta.getMovId());
+        safe.setNumeroFactura(venta.getNumeroFactura());
+        safe.setFechaEmision(venta.getFechaEmision());
+        safe.setUltimocambio(venta.getUltimocambio());
+        safe.setTotal(venta.getTotal());
+        safe.setDescuento(venta.getDescuento());
+        safe.setCondicion(venta.getCondicion());
+        safe.setEstatus(venta.getEstatus());
+
+        // Cliente simplificado
+        if (venta.getCliente() != null) {
+            com.salessystem.model.Cliente c = new com.salessystem.model.Cliente();
+            c.setId(venta.getCliente().getId());
+            c.setNombre(venta.getCliente().getNombre());
+            c.setApellido(venta.getCliente().getApellido());
+            c.setEmail(venta.getCliente().getEmail());
+            safe.setCliente(c);
+        }
+
+        // Detalles simplificados
+        if (venta.getDetalles() != null) {
+            java.util.List<com.salessystem.model.DetalleVenta> detalles = new java.util.ArrayList<>();
+            for (com.salessystem.model.DetalleVenta d : venta.getDetalles()) {
+                com.salessystem.model.DetalleVenta sd = new com.salessystem.model.DetalleVenta();
+                sd.setCantidad(d.getCantidad());
+                sd.setPrecioUnitario(d.getPrecioUnitario());
+                sd.setSubtotal(d.getSubtotal());
+                if (d.getProducto() != null) {
+                    com.salessystem.model.Producto p = new com.salessystem.model.Producto();
+                    p.setId(d.getProducto().getId());
+                    p.setNombre(d.getProducto().getNombre());
+                    p.setPrecio(d.getProducto().getPrecio());
+                    sd.setProducto(p);
+                }
+                detalles.add(sd);
+            }
+            safe.setDetalles(detalles);
+        }
+
+        return safe;
     }
 
 }
