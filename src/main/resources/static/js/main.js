@@ -297,24 +297,24 @@ function enviarFormularioAjax(accion) {
         success: function(response) {
             console.log('=== RESPUESTA EXITOSA ===');
             ocultarSpinner();
-            
+
             // Reemplazar el contenido de la página con la respuesta
             document.open();
             document.write(response);
             document.close();
         },
-        error: function(xhr, status, error) {
-            console.error('=== ERROR EN AJAX ===');
-            console.error('Status:', status);
-            console.error('Error:', error);
-            console.error('Response:', xhr.responseText);
-            
-            ocultarSpinner();
-            showToast('Error al procesar la solicitud: ' + error, 'error');
-        }
-    });
-    
-    return false; // Prevenir envío normal del formulario
+         error: function(xhr, status, error) {
+             console.error('=== ERROR EN AJAX ===');
+             console.error('Status:', status);
+             console.error('Error:', error);
+             console.error('Response:', xhr.responseText);
+
+             ocultarSpinner();
+             showToast('Error al procesar la solicitud: ' + error, 'error');
+         }
+     });
+
+     return false; // Prevenir envío normal del formulario
 }
 
 // Función para mostrar spinner

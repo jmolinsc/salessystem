@@ -85,7 +85,7 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <label for="mov" class="form-label">Documento<span class="text-danger">*</span></label>
-                    <select class="form-select" name="mov.id" id="mov" required onchange="updateComportamiento(this)" th:disabled="${formularioDeshabilitado}">
+                    <select class="form-select"  name="mov.id" id="mov" required onchange="updateComportamiento(this)" th:disabled="${formularioDeshabilitado}">
                         <option value="">Select document type...</option>
                         <option th:each="tipo : ${tiposDocumento}"
                                 th:value="${tipo.id}"

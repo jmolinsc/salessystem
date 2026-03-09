@@ -26,6 +26,7 @@ public class Usuario {
         this.roles = roles;
     }
 
+
     public Long getId() {
         return id;
     }

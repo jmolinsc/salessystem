@@ -247,6 +247,7 @@ public class VentaController {
         }
     }
 
+
     @GetMapping("/{id}")
     public String verDetalleVenta(@PathVariable Long id, Model model) {
         Venta venta = ventaService.obtenerVentaPorId(id)
@@ -275,6 +276,7 @@ public class VentaController {
         System.out.println("=== DEBUG EDITAR VENTA ===");
         System.out.println("Estatus: " + venta.getEstatus());
         System.out.println("Formulario deshabilitado: " + formularioDeshabilitado);
+        System.out.println("venta: " + venta);
 
         return "ventas/form";
     }
@@ -409,6 +411,7 @@ public class VentaController {
         if (venta == null) return null;
         com.salessystem.model.Venta safe = new com.salessystem.model.Venta();
         safe.setId(venta.getId());
+        safe.setMov(venta.getMov());
         safe.setMovId(venta.getMovId());
         safe.setNumeroFactura(venta.getNumeroFactura());
         safe.setFechaEmision(venta.getFechaEmision());
