@@ -2,6 +2,7 @@ package com.salessystem.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "tipos_documento")
@@ -28,6 +29,10 @@ public class TipoDocumento {
 
     @Column(name = "fecha_alta")
     private LocalDateTime fechaAlta;
+
+    // Relación inversa: usuarios que tienen este tipo de documento
+    @ManyToMany(mappedBy = "tiposDocumento", fetch = FetchType.LAZY)
+    private Set<Usuario> usuarios;
 
     // Constructores
     public TipoDocumento() {
@@ -98,6 +103,14 @@ public class TipoDocumento {
 
     public void setFechaAlta(LocalDateTime fechaAlta) {
         this.fechaAlta = fechaAlta;
+    }
+
+    public Set<Usuario> getUsuarios() {
+        return usuarios;
+    }
+
+    public void setUsuarios(Set<Usuario> usuarios) {
+        this.usuarios = usuarios;
     }
 
     @Override

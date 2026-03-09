@@ -18,6 +18,13 @@ public class Usuario {
     @JoinTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "rol_id"))
     private Set<Rol> roles;
 
+     // Nueva relación: tipos de documento asociados al usuario
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "usuarios_tipos_documento",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "tipo_documento_id"))
+    private Set<TipoDocumento> tiposDocumento;
+
     public Set<Rol> getRoles() {
         return roles;
     }
@@ -65,5 +72,13 @@ public class Usuario {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Set<TipoDocumento> getTiposDocumento() {
+        return tiposDocumento;
+    }
+
+    public void setTiposDocumento(Set<TipoDocumento> tiposDocumento) {
+        this.tiposDocumento = tiposDocumento;
     }
 }

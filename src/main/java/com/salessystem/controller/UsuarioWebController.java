@@ -3,11 +3,9 @@ package com.salessystem.controller;
 import com.salessystem.model.Menu;
 import com.salessystem.model.Permiso;
 import com.salessystem.model.Rol;
+import com.salessystem.model.TipoDocumento;
 import com.salessystem.model.Usuario;
-import com.salessystem.service.MenuService;
-import com.salessystem.service.PermisoService;
-import com.salessystem.service.RolService;
-import com.salessystem.service.UsuarioService;
+import com.salessystem.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -39,6 +37,9 @@ public class UsuarioWebController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private TipoDocumentoService tipoDocumentoService;
+
     // === GESTIÓN DE USUARIOS ===
 
     @GetMapping
@@ -51,6 +52,7 @@ public class UsuarioWebController {
     public String showFormUsuario(Model model) {
         model.addAttribute("usuario", new Usuario());
         model.addAttribute("roles", rolService.findAllActive());
+        model.addAttribute("tiposDocumento", tipoDocumentoService.findAllActivos());
         return "usuarios/form";
     }
 
@@ -60,6 +62,7 @@ public class UsuarioWebController {
         if (usuario.isPresent()) {
             model.addAttribute("usuario", usuario.get());
             model.addAttribute("roles", rolService.findAllActive());
+            model.addAttribute("tiposDocumento", tipoDocumentoService.findAllActivos());
             return "usuarios/form";
         } else {
             redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
@@ -70,6 +73,7 @@ public class UsuarioWebController {
     @PostMapping("/guardar")
     public String saveUsuario(@ModelAttribute Usuario usuario,
                              @RequestParam(value = "roleIds", required = false) List<Long> roleIds,
+                             @RequestParam(value = "tipoDocumentoIds", required = false) List<Long> tipoDocumentoIds,
                              RedirectAttributes redirectAttributes) {
         try {
             // Si es nuevo usuario, encriptar password
@@ -96,6 +100,18 @@ public class UsuarioWebController {
                 }
             }
             usuario.setRoles(roles);
+
+            // Asignar tipos de documento
+            Set<TipoDocumento> tiposDocumento = new HashSet<>();
+            if (tipoDocumentoIds != null) {
+                for (Long tipoDocumentoId : tipoDocumentoIds) {
+                    Optional<TipoDocumento> tipoDocumento = tipoDocumentoService.findById(tipoDocumentoId);
+                    if (tipoDocumento.isPresent()) {
+                        tiposDocumento.add(tipoDocumento.get());
+                    }
+                }
+            }
+            usuario.setTiposDocumento(tiposDocumento);
 
             usuarioService.save(usuario);
             redirectAttributes.addFlashAttribute("success", "Usuario guardado exitosamente");

@@ -87,7 +87,11 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
-
+		<!-- Spring Boot Actuator para monitoreo y actualizaciones -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
 
 	</dependencies>
 
